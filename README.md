@@ -20,28 +20,8 @@ Want to play rickroll when your friends join your discord channel? This is a sim
 
 * node.js
 [https://nodejs.org/en/](https://nodejs.org/en/) Note: You need node.js version 10.0.0 or newer
-* ytdl-core
-```sh
-npm install ytdl-core
-```
-* FFMPEG
-```sh
-npm install ffmpeg
-```
-* FFMPEG binaries
-```sh
-npm install ffmpeg-binaries@3.2.2-3
-```
-* Opus engine
-```sh
-npm install node-opus
-```
-* Discord.js
-```sh
-npm install discordjs/discord.js
-```
 
-### Installation
+### Create the bot
 
 1. Create an account or log in on [https://discordapp.com/developers/applications/](https://discordapp.com/developers/applications/)
 2. Create a new application on the website
@@ -49,29 +29,26 @@ npm install discordjs/discord.js
     1. Go to "Bot" section in the setting to the left on the site
     2. Copy the token
 4. Send bot to server
-    1. Find client id in the "General Information" section
-    2. Swap your client id with the CLIENTID in the link [https://discordapp.com/oauth2/authorize?&client_id=CLIENTID&scope=bot&permissions=8](https://discordapp.com/oauth2/authorize?&client_id=CLIENTID&scope=bot&permissions=8)
-    3. The bot should now show in your channel
-5. Clone the repository
-6. Add the discord token to your 'auth.json' and 'bot.js'
+    1. Go to OAuth2
+    2. Under OAuth2 URL Generator select bot and application.commands
+    3. Under BOT PERMISSIONS select administrator
+    4. Copy the link and paste it into your browser
+    5. The bot should now show in your channel
+
+ ### Installation
+ 
+1. Clone the repository
+2. Create a new file auth.js and add your auth
 ```sh
-"token": "AUTH TOKEN HERE"
+module.exports = {
+    token <add discord token here>: ,
+    parseAppId:,
+    parseJsId:,
+    botAppId: <right click on bot and copy id>,
+    serverId: <right click on server and copy id>
+}
 ```
-```sh
-bot.login('Add Login here')
-```
-7. Change the variable in 'bot.js' to the user's id when the music is going to play. You can also create other cases with other user id:s. To get your or your friends id simply right click on a user and click "Copy ID".
-```sh
-case 'User ID Here':
-```
-8. Change the variable in 'bot.js' to the location where the music file is located
-```sh
-playFile('Location for music file', newMember);
-```
-9. Run the bot with the command
-```sh
-node bot.js
-```
+3. run "npm install"
 
 ## Host the bot
 
