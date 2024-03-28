@@ -1,0 +1,271 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+    <title>My Back4App web-site</title>
+    <style>
+	
+	 @keyframes example
+	 {
+		  0%   {background-image: url(https://i1.sndcdn.com/artworks-000215211827-41hw1g-t500x500.jpg)}
+		  25%  {background-image: url(https://steamuserimages-a.akamaihd.net/ugc/818937176193218419/E897B691896D6288E2BB5E52052A06E469631D81/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false)}
+		  50%  {background-image: url(https://i.ytimg.com/vi/zlJHxyYaF6g/maxresdefault.jpg)}
+		  75%  {background-image: url(https://avatars.akamai.steamstatic.com/a4be7a06edff11663c277e0d1c0ea953f89d3f82_full.jpg)}
+	 }
+	
+	  html, body {height: 100%;}
+      body { background-image: url(lenny.jpg); animation-name: example; animation-duration: 10s; animation-iteration-count: infinite;}
+      h1 { font-size: 30px; margin: 20; }
+      p { margin: 40px 0; }
+      em { font-family: monospace; }
+      a { color: #5298fc; text-decoration: none; }
+	  .submitDiv {background-color: lightblue; width: 400px; height: 300px; margin: 40px auto; padding: 20px; border: 2px}
+	  .timeDiv {background-color: lightblue; width: 400px; height: 300px; margin: 40px auto; padding: 20px; border: 2px}
+	  .barDiv {background-color: green; width: 100%; height: 100px; top: 0%; left: 100%;}
+	  .updatedTimeDiv {width: 100%; height: 50px; margin-bottom: 1px; margin-left: 1px; margin-top: 95% bottom: 0;}
+	  .mainpage {font-family: Helvetica, Arial, sans-serif; display: table-cell; vertical-align: middle; display: table; margin: auto;}
+	  .menyItem {width: 200px; height: 100%; background-color: #ffffff; display: flex; justify-content: center; align-items: center; float:left; margin-left: 5px;}
+	  .menyItem:hover { background-color: #dbdbdb; cursor: pointer; background-image: url('https://preview.redd.it/m8o6dsxvymo21.jpg?auto=webp&s=51ddddc6b533a302ee75fd36c17a6225c8eff1cb'); background-repeat: no-repeat; background-size: 200px 100px;}
+    
+
+	
+	</style>
+    <script>
+    var popped = false;
+    Parse.initialize("<serverid>", "<js id>");
+    Parse.serverURL = 'https://parseapi.back4app.com/'
+	
+	var timeInDiscordList = new Array();
+	
+	async function getDiscordTimes()
+	{
+	  timeInDiscordList = new Array();
+	  
+	  const timeInDiscord = Parse.Object.extend("TimeInDiscord");
+	  const query = new Parse.Query(timeInDiscord)
+	  let results = await query.find()
+		
+	  console.log("Finding times: " + results.length)
+			
+	  for (let i = 0; i < results.length; i++)
+	  {
+  		let thisObject = results[i];
+  		let userName = thisObject.get('name')
+  		let time = thisObject.get('time')
+  		let sessionTime = thisObject.get('sessionTime')
+  		
+  		timeInDiscordList.push({"userName": userName, "time": time, "sessionTime": sessionTime})
+	  }
+	  timeInDiscordList.sort(function(a, b){return Number(b["time"]) - Number(a["time"]) });
+	  
+	  var today = new Date();
+    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    var dateTime = date+' '+time;
+    
+    var updated_time = document.getElementById('updated_time')
+    updated_time.innerHTML = "Last updated: " + dateTime
+    
+    fillTable()
+	}
+	
+		function convertToTime(minutes)
+	{
+	  let out = ""
+	  
+	  let tmpMinutes = Number(minutes)
+	  
+	  let days = Math.floor(tmpMinutes / (60 * 24))
+	  
+	  tmpMinutes -= days * (60 * 24)
+	  
+	  let hours =  Math.floor(tmpMinutes / 60)
+	  
+	  tmpMinutes -= hours * 60
+	  
+	  if (days !== 0)
+	  {
+	    out += days + "d "
+	  }
+	  
+	  if (hours !== 0)
+	  {
+	    out += hours + "h "
+	  }
+	  
+	  if (tmpMinutes !== 0)
+	  {
+	    out += tmpMinutes + "m"
+	  }
+	  
+	  if (out === "")
+	  {
+	    out = "0m"
+	  }
+	  
+	  return out
+	}
+	
+	function fillTable()
+	{
+		const table = document.getElementById("score_table");
+		
+		table.innerHTML = ""
+		
+		let row = table.insertRow()
+		let pos = row.insertCell(0)
+		pos.innerHTML = "Pos"
+		
+		let name = row.insertCell(1)
+		name.innerHTML = "Name"
+		
+		let sessionTime = row.insertCell(2)
+		sessionTime.innerHTML = "Session Time"
+		
+		let totalTime = row.insertCell(3)
+		totalTime.innerHTML = "Total Time"
+		
+		for (let i = 0; i < timeInDiscordList.length; i++)
+		{
+			let row = table.insertRow()
+			let place = row.insertCell(0)
+			place.innerHTML = (i+1)
+			
+			let name = row.insertCell(1)
+			name.innerHTML = timeInDiscordList[i]["userName"]
+			
+			let sessionTimeRow = row.insertCell(2)
+			let sessionTime = timeInDiscordList[i]["sessionTime"]
+			sessionTimeRow.innerHTML = convertToTime(sessionTime)
+			
+			let timeRow = row.insertCell(3)
+			let time = timeInDiscordList[i]["time"]
+			timeRow.innerHTML = convertToTime(time)
+		}
+		
+	}
+	
+	//getDiscordTimes()
+	
+      async function uploadFile() {
+
+          var songStuffs = document.getElementById("myfile").files[0];
+          
+          var audioName = document.getElementById('audioName').value;
+
+		  var creator = document.getElementById('creator').value;
+          
+          var queueable = document.getElementById('queueable').checked;
+          
+          if (audioName.includes('.'))
+          {
+            alert("Inga j�vla punkter i namnet")
+            return
+          }
+          
+          if (audioName == "")
+          {
+            alert("M�ste ha ett namn, dumskalle")
+            return
+          }
+          
+          if (!songStuffs.name.includes(".mp3"))
+          {
+            alert("Bara mp3-filer, din n�t")
+            return
+          }
+          const parseFile = new Parse.File(audioName + ".mp3", songStuffs)
+          
+          let responseFile;
+          try
+          {
+            responseFile = await parseFile.save()
+          }
+          catch(error)
+          {
+            alert('Failed to create parse file, with error code: ' + error.message)
+          }
+          const sounds = new Parse.Object("Sounds");
+
+          sounds.set("File", responseFile);
+          sounds.set("queueable", queueable);
+		  sounds.set("creator", creator);
+          
+          try{
+              //Save the Object
+              let result = await sounds.save()
+              alert('New object created with objectId: ' + result.id);
+          }catch(error){
+              alert('Failed to create new object, with error code: ' + error.message);
+          }
+      }
+	  
+	  save_to_history = function(state, title, url)
+	  {
+		  if (url != "/") // If the url isn't / the url uses a # url
+			url = "#"+url;
+		  if (!popped) // Doesnt save the history if the website has been popped
+			history.pushState(state, title, url)
+		  popped = false;
+	  }
+
+	  
+	  function changeView(name)
+	  {
+  		document.getElementById("submitView").style.display = "none";
+  		document.getElementById("timeView").style.display = "none";
+  		
+  		document.getElementById("hi_again").play();
+  		
+  		let newView = document.getElementById(name);
+  		
+  	    newView.style.display = "block";
+  		save_to_history({"key":name}, name, name);
+	  }
+	  
+
+	window.onpopstate = function()
+	{
+		var url = document.URL.substring(document.URL.indexOf('#') + 1)
+		console.log(url);
+		popped = true; // Makes sure that the history doesnt save when its popped
+		changeView(url)
+	}
+	
+    </script>
+  </head>
+  <body>
+	<audio id="hi_again" src="hi.mp3" preload="auto"></audio>
+  
+	<div class=barDiv>
+		<div class="menyItem" onclick="changeView('timeView')"> <p> Discans Highscore </p> </div>
+		<div class="menyItem" onclick="changeView('submitView')"> <p> Ladda upp ljud </p> </div>
+	</div>
+  
+	<div class="mainPage">
+		<div class="submitDiv" id="submitView">
+			<h1>Ladda upp ljud till Mr-Bot</h1>
+			<form enctype="multipart/form-data">
+				<label for="audioName">Ljudnamn:</label>
+				<input type="text" id="audioName" name="audioName"><br><br>
+				<label for="creator">Skapare:</label>
+				<input type="text" id="creator" name="creator"><br><br>
+		  
+				<label for="myfile">V�lj en fil:</label>
+				<input type="file" id="myfile" name="myfile" accept=".mp3" />
+				<br /><br />
+				<label for="queueable">Kan k�as</label>
+				<input type="checkbox" id="queueable" name="queueable" checked> <br><br>
+				<input id="submit" type="button" value="Tryck upp" onclick="uploadFile()" />
+			</form>
+		</div>
+	
+		<div class="timeDiv" id="timeView" style="display: none;">
+			<table style="width:100%" id="score_table"> </table>
+			<br><br>
+			<div class="updatedTimeDiv" id="updatedTimeDiv">
+			  <div id="updated_time">Last updated: Not updated yet</div>
+			</div>
+		</div>
+	</div>
+  </body>
+</html>
