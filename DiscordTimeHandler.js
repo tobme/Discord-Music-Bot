@@ -49,6 +49,11 @@ class DiscordTimeHandler {
 
     static isUserInDiscord(userId)
     {
+        if (!DiscordTimeHandler.usersDict.hasOwnProperty(userId))
+        {
+            return false
+        }
+        
         return DiscordTimeHandler.usersDict[userId].inDiscord
     }
 
@@ -248,7 +253,7 @@ class DiscordTimeHandler {
 
     static userAfk(userId, Parse)
     {
-        this.updateTime(userId, Parse)
+        DiscordTimeHandler.updateTime(userId, Parse)
 
         DiscordTimeHandler.usersDict[userId].joinTime = new Date()
     }
@@ -352,7 +357,7 @@ class DiscordTimeHandler {
     {
         DiscordTimeHandler.usersDict[userID].inDiscord = false
 
-        this.updateTime(userID, Parse)
+        DiscordTimeHandler.updateTime(userID, Parse)
     }
 }
 

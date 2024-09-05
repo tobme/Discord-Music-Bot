@@ -1,5 +1,5 @@
 
-const { SlashCommandBuilder } = require('discord.js')
+const { ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, SlashCommandBuilder } = require('discord.js')
 const TimeHandler = require('../../DiscordTimeHandler.js');
 const {convertToTime} = require('../../TimeConverter.js')
 
@@ -101,8 +101,192 @@ module.exports = {
           let tmpLongestAway = tmpLongestAwayStr !== 0 ? convertToTime(tmpLongestAwayStr).padEnd(11, " ") : String("No Data").padEnd(11, " ")
           string += tmpLongestAway + '\n'
         }
+
+        // 
+
+        const selectYear = new StringSelectMenuBuilder()
+            .setCustomId('year')
+            .setPlaceholder('All')
+            .addOptions(
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('All')
+                    .setValue('All'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('2024')
+                    .setValue('2024'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('2025')
+                    .setValue('2025'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('2026')
+                    .setValue('2026'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('2027')
+                    .setValue('2027'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('2028')
+                    .setValue('2028'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('2029')
+                    .setValue('2029'),
+            );
+
+        const selectMonth = new StringSelectMenuBuilder()
+            .setCustomId('month')
+            .setPlaceholder('All')
+            .addOptions(
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('All')
+                    .setValue('All'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('Januari')
+                    .setValue('1'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('Februari')
+                    .setValue('2'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('Mars')
+                    .setValue('3'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('April')
+                    .setValue('4'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('Maj')
+                    .setValue('5'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('Juni')
+                    .setValue('6'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('Juli')
+                    .setValue('7'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('Augusti')
+                    .setValue('8'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('September')
+                    .setValue('9'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('Oktober')
+                    .setValue('10'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('November')
+                    .setValue('11'),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel('December')
+                    .setValue('12'),
+            );
+
+        const selectDay = new StringSelectMenuBuilder()
+			.setCustomId('day')
+			.setPlaceholder('All')
+			.addOptions(
+				new StringSelectMenuOptionBuilder()
+					.setLabel('All')
+					.setValue('All'),
+				new StringSelectMenuOptionBuilder()
+					.setLabel('1')
+					.setValue('1'),
+				new StringSelectMenuOptionBuilder()
+					.setLabel('2')
+					.setValue('2'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('3')
+					.setValue('3'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('4')
+					.setValue('4'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('5')
+					.setValue('5'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('6')
+					.setValue('6'),
+				new StringSelectMenuOptionBuilder()
+					.setLabel('7')
+					.setValue('7'),
+				new StringSelectMenuOptionBuilder()
+					.setLabel('8')
+					.setValue('8'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('9')
+					.setValue('9'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('10')
+					.setValue('10'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('11')
+					.setValue('11'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('12')
+					.setValue('12'),
+				new StringSelectMenuOptionBuilder()
+					.setLabel('13')
+					.setValue('13'),
+				new StringSelectMenuOptionBuilder()
+					.setLabel('14')
+					.setValue('14'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('15')
+					.setValue('15'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('16')
+					.setValue('16'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('17')
+					.setValue('17'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('18')
+					.setValue('18'),
+				new StringSelectMenuOptionBuilder()
+					.setLabel('19')
+					.setValue('19'),
+				new StringSelectMenuOptionBuilder()
+					.setLabel('20')
+					.setValue('20'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('21')
+					.setValue('21'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('22')
+					.setValue('22'),
+                    /*
+                new StringSelectMenuOptionBuilder()
+					.setLabel('23')
+					.setValue('23'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('24')
+					.setValue('24'),
+				new StringSelectMenuOptionBuilder()
+					.setLabel('25')
+					.setValue('25'),
+				new StringSelectMenuOptionBuilder()
+					.setLabel('26')
+					.setValue('26'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('27')
+					.setValue('27'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('28')
+					.setValue('28'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('29')
+					.setValue('29'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('30')
+					.setValue('30'),
+                new StringSelectMenuOptionBuilder()
+					.setLabel('31')
+					.setValue('31'),
+                    */
+			);
         
+        const row = new ActionRowBuilder().addComponents(selectYear);
+        const row2 = new ActionRowBuilder().addComponents(selectMonth)
+        const row3 = new ActionRowBuilder().addComponents(selectDay)
+
         if (string != '')
-            await interaction.reply({"content": string, ephemeral: false});
+        {
+            await interaction.reply({"content": string, components: [row, row2, row3], ephemeral: false});
+        }
     }
 }

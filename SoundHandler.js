@@ -43,7 +43,7 @@ class SoundHandler {
             let amountPlayed = thisObject.get("amountPlayed")
             let creatorName = thisObject.get("creator")
 
-            if (approved)
+            if (approved && file !== undefined && file !== null)
             {
                 name = name.substring(name.indexOf("_") + 1)
                 name = name.substring(0, name.indexOf("."))
@@ -55,14 +55,14 @@ class SoundHandler {
         }
     }
 
-    static async addSong(songName, fileUrl, queueable, objectId, creatorName)
+    static addSong(songName, fileUrl, queueable, objectId, creatorName)
     {
         const found = this.musicList.find(element => element.name === songName)
 
         if (found === undefined)
         {
             console.log("Adding file: " + songName)
-            const musicInfo = new MusicInfo(songName, fileUrl, queueable, null, 0, creatorName)
+            const musicInfo = new MusicInfo(songName, fileUrl, queueable, objectId, 0, creatorName)
             this.musicList.push(musicInfo)
         }
         else
@@ -76,7 +76,7 @@ class SoundHandler {
         }
     }
 
-    static async removeSong(songName)
+    static removeSong(songName)
     {
         const found = this.musicList.find(element => element.name === songName)
 
