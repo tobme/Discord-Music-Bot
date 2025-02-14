@@ -1,0 +1,21 @@
+stages:
+  - test
+
+variables:
+  # Define Node.js version (this can be modified according to your project needs)
+  NODE_VERSION: "18"
+
+# Define the test stage
+test:
+  stage: test
+  image: node:${NODE_VERSION} # Use a Node.js Docker image (change version if needed)
+  before_script:
+    - npm install -g npm # Ensure the latest npm version
+    - npm install # Install dependencies
+  script:
+    - npm run test # Run the tests using Jest
+  cache:
+    paths:
+      - node_modules/ # Cache the node_modules folder for speed optimization
+
+# Optional: Define cleanup or notification stages as needed
