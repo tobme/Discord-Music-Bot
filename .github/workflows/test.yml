@@ -1,0 +1,40 @@
+name: Run Jest Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest  # You can change this to macos-latest or windows-latest if needed
+    strategy:
+      matrix:
+        node-version: [16, 18]  # You can change or add more Node.js versions here
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2  # Checks out the repository code
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}  # Set Node.js version from the matrix
+      
+      - name: Install dependencies
+        run: |
+          npm install -g npm  # Ensure we use the latest npm version
+          npm install         # Install project dependencies
+
+      - name: Run Jest tests
+        run: npm run test    # Run the tests defined in your package.json (e.g., "test": "jest")
+
+      - name: Upload test results
+        if: success()  # Only upload test results if tests passed
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: ./test-results  # Ensure your Jest results are stored in this folder or modify path accordingly
