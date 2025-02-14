@@ -30,7 +30,7 @@ jobs:
           npm install         # Install project dependencies
 
       - name: Run Jest tests
-        run: npm run test    # Run the tests defined in your package.json (e.g., "test": "jest")
+        run: npm test    # Run the tests defined in your package.json (e.g., "test": "jest")
 
       - name: Upload test results
         if: success()  # Only upload test results if tests passed
