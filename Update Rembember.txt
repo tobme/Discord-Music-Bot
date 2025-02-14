@@ -1,0 +1,5 @@
+discordjs/opus har dependency till discordjs/node-pre-gyp, den har specifierat node versioner till vilken prebuilt som ska laddas ner för opus. "C:\Users\Tobbe\source\repos\Discord-Music-Bot\node_modules\@discordjs\node-pre-gyp\lib\util\abi_crosswalk.json"
+
+Den senaste för 0.4.5 är nodejs 18.4.0. Om man kör senare kanske man får fel version!!
+Om uppdatera efter 18.4.0 behöver node-pre-gyp ha uppdaterats!
+

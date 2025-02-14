@@ -7,32 +7,31 @@ class ChannelManager
         this.player = createAudioPlayer();
         this.playing = false
         this.playBackManger = playBackManger
+        this.playing = false
+        this.connection = null
 
         this.player.on(AudioPlayerStatus.Idle, () => {
-            connection.destroy();
-            playing = false
+            this.connection.destroy();
+            this.playing = false
         });
     
         this.player.on(AudioPlayerStatus.Playing, () => {
-            playing = true
+            this.playing = true
         });
     }
 
     playFile(channel)
     {
-        console.log("CHA")
         const fileURL = this.playBackManger.getNextSong()
 
-        console.log("CHA2")
-
         const resource = createAudioResource(fileURL, { inlineVolume: true });
-        player.play(resource);
+        this.player.play(resource);
 
 
-        entersState(player, AudioPlayerStatus.Playing, 5e3);
+        entersState(this.player, AudioPlayerStatus.Playing, 5e3);
 
-        connection = this.connectToChannel(channel)
-        connection.subscribe(this.player)
+        this.connection = this.connectToChannel(channel)
+        this.connection.subscribe(this.player)
     }
 
     connectToChannel(channel) {

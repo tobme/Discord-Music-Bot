@@ -7,11 +7,7 @@ class PlaybackManager {
     }
 
     getNextSong() {
-        console.log("000")
-
         let song = this.queueManager.getNextSong()
-
-        console.log("First " + song)
 
         if (!song) {
             song = Math.random() < 0.2
@@ -30,9 +26,9 @@ class PlaybackManager {
         this.queueManager.addQueue(songName)
     }
 
-    addSong(songName)
+    addSong(songName, fileUrl, queueable, objectId, creatorName)
     {
-        this.musicManager.addSong(songName)
+        this.musicManager.addSong(songName, fileUrl, queueable, objectId, creatorName)
     }
 
     removeSong(songName)

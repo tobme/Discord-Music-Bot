@@ -21,11 +21,11 @@
     "glob": "^9.3.5",
     "husky": "6.0.0",
     "js": "^0.1.0",
-    "node": "^16.18.1",
+    "node": "18.4.0",
     "node-gyp": "^8.4.1",
     "node-pre-gyp": "^0.17.0",
     "node.js": "0.0.1-security",
-    "npm": "^10.2.3",
+    "npm": "^8.x",
     "parse": "^5.0.0",
     "rebuild": "^0.1.2",
     "tweetnacl": "^1.0.3",
@@ -34,3 +34,5 @@
   "keywords": [],
   "license": "ISC"
 }
+
+
