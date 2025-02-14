@@ -1,7 +1,6 @@
 
 const { ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, SlashCommandBuilder } = require('discord.js')
-const TimeHandler = require('../../DiscordTimeHandler.js');
-const {convertToTime} = require('../../TimeConverter.js')
+const {convertToTime} = require('../../TimeHandling/TimeConverter.js')
 
 
 async function getLongestAway(user)
@@ -66,9 +65,11 @@ module.exports = {
     .setName('onionscore')
     .setDescription('Lists all the onion'),
 
-    async execute(interaction) {
+    async execute(interaction, context) 
+    {
+        var {timeHandler} = context;
 
-        var personsInDiscord = TimeHandler.usersDict
+        var personsInDiscord = timeHandler.getDiscordTimes()
     
         var out = new Array()
                   

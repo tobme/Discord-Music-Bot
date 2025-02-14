@@ -1,6 +1,5 @@
 
 const { SlashCommandBuilder } = require('discord.js')
-const SoundHandler = require('../../SoundHandler.js');
 
 module.exports = {
   data :
@@ -8,9 +7,10 @@ module.exports = {
     .setName('list')
     .setDescription('Lists all sounds'),
 
-  async execute(interaction) {
-
-      var musicList = SoundHandler.musicList
+  async execute(interaction, context)
+   {
+      const {playBackManger} = context;
+      var musicList = playBackManger.getMusicList()
 
       await interaction.reply({content: "Sending sounds", ephemeral: true});
       

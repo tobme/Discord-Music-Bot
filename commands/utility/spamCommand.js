@@ -1,6 +1,5 @@
 
 const { SlashCommandBuilder } = require('discord.js')
-const SoundHandler = require('../../SoundHandler.js');
 
 module.exports = {
     data :
@@ -8,9 +7,10 @@ module.exports = {
         .setName('spamsounds')
         .setDescription('Rank top 10 spammed sounds'),
 
-    async execute(interaction) 
+    async execute(interaction, context) 
     {
-        var musicList = SoundHandler.musicList
+        const {playBackManger} = context
+        var musicList = playBackManger.getMusicList()
 
         let string = ''
         var tmpArray = new Array()

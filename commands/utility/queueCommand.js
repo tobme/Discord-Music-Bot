@@ -1,6 +1,5 @@
 
 const { SlashCommandBuilder } = require('discord.js')
-const SoundHandler = require('../../SoundHandler.js');
 
 module.exports = {
     data :
@@ -12,13 +11,15 @@ module.exports = {
             .setDescription("Song name")
             .setRequired(true)),
 
-    async execute(interaction) 
+    async execute(interaction, context) 
     {
+        const {playBackManager} = context;
+
         let songName = interaction.options.get('name').value
 
         console.log("Trying to add %s...", songName)
 
-        var success = SoundHandler.addQueue(songName)
+        var success = playBackManager.addQueue(songName)
 
         if (success)
         {

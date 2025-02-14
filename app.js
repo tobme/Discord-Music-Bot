@@ -1,7 +1,9 @@
 //var { engines } = import('./package');
 const Parser = require("parse/node.js");
-const TimeHandler = require('./DiscordTimeHandler.js')
-const SoundHandler = require('./SoundHandler.js')
+const {createDiscordTimeHandler} = require('./TimeHandling/DiscordTimeHandlerFactory.js')
+const TimeHandler = require('./TimeHandling/DiscordTimeHandler.js')
+const {createPlayBackManager} = require('./MusicHandling/PlayBackManagerFactory.js')
+const ChannelManager = require('./ChannelManager.js')
 const auth = require("./auth.js")
 
 const fs = require('fs');
@@ -12,23 +14,29 @@ Parser.serverURL = 'https://parseapi.back4app.com/'
 
 console.log("Starting")
 
-//const { join } = require("path");
-
 const { Client, GatewayIntentBits, Events, Collection, REST, Routes } = require('discord.js')
-
 const bot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildPresences] });
-
-const {joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, VoiceConnectionStatus, StreamType, entersState   } = require("@discordjs/voice")
- 
-const player = createAudioPlayer();
-
-var connection
 
 var token = auth.token
 var botAppId = auth.botAppId
 var serverID = auth.serverId
 
 bot.login(token);
+
+const timeHandler = createDiscordTimeHandler(Parser)
+const playBackManger = createPlayBackManager(Parser)
+const channelManager = new ChannelManager(playBackManger)
+
+const context = {
+	playBackManger,
+	timeHandler
+}
+
+console.log("Version: " + process.version);
+
+
+
+
 
 const commands = [];
 bot.commands = new Collection();
@@ -72,8 +80,35 @@ const rest = new REST().setToken(token);
 	}
 })();
 
-SoundHandler.retrieveSounds(Parser)
-TimeHandler.retrieveDiscordTimes(Parser)
+bot.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isChatInputCommand()) return;
+
+	const command = interaction.client.commands.get(interaction.commandName);
+
+	if (!command) {
+		console.error(`No command matching ${interaction.commandName} was found.`);
+		return;
+	}
+
+	try {
+		await command.execute(interaction, context);
+	} catch (error) {
+		console.error(error);
+		if (interaction.replied || interaction.deferred) {
+			await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+		} else {
+			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+		}
+	}
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('Uncaught Exception:', error);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
 
 /*
 Parse.Cloud.afterSave("Sounds", (request) => 
@@ -90,11 +125,11 @@ Parse.Cloud.afterSave("Sounds", (request) =>
 	
 	if (!approved)
 	{
-		SoundHandler.removeSong(name)
+		playBackManger.removeSong(name)
 	}
 	else
 	{
-		SoundHandler.addSong(name, file["_url"], queueable, objectId, creatorName)
+		playBackManger.addSong(name, file["_url"], queueable, objectId, creatorName)
 	}
 });
 
@@ -103,67 +138,9 @@ Parse.Cloud.job("noIdle", async (request) => {
 });
 */
 
-bot.on(Events.InteractionCreate, async interaction => {
-	if (!interaction.isChatInputCommand()) return;
-
-	const command = interaction.client.commands.get(interaction.commandName);
-
-	if (!command) {
-		console.error(`No command matching ${interaction.commandName} was found.`);
-		return;
-	}
-
-	try {
-		await command.execute(interaction);
-	} catch (error) {
-		console.error(error);
-		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-		} else {
-			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-		}
-	}
-});
-
-function playFile(fileURL)
-{
-	const resource = createAudioResource(fileURL, { inlineVolume: true });
-	player.play(resource);
-
-
-	return entersState(player, AudioPlayerStatus.Playing, 5e3);
-}
-
-function connectToChannel(channel) {
-	const connection = joinVoiceChannel({
-		channelId: channel.channelId,
-		guildId: channel.guild.id,
-		adapterCreator: channel.guild.voiceAdapterCreator,
-	});
-
-	try {
-		entersState(connection, VoiceConnectionStatus.Ready, 30e3);
-		return connection;
-	} catch (error) {
-		connection.destroy();
-		throw error;
-	}
-}
-
-var playing = false
-
-player.on(AudioPlayerStatus.Idle, () => {
-    connection.destroy();
-    playing = false
-});
-
-player.on(AudioPlayerStatus.Playing, () => {
-    playing = true
-});
-
 bot.on("presenceUpdate", (oldMember, newMember) => {
 
-	if (!TimeHandler.isUserInDiscord(newMember.user.id) ||
+	if (!timeHandler.isUserInDiscord(newMember.user.id) ||
 		oldMember.status == newMember.status)
 	{
 		return
@@ -172,12 +149,12 @@ bot.on("presenceUpdate", (oldMember, newMember) => {
 	if (newMember.status == "idle") // going afk
 	{
 		console.log("User going afk ", newMember.user.id)
-		TimeHandler.userAfk(newMember.user.id, Parser)
+		timeHandler.userAfk(newMember.user.id)
 	}
 	else if (oldMember.status == "idle") // coming back from afk
 	{
 		console.log("User coming back ", newMember.user.id)
-		TimeHandler.backFromAfk(newMember.user.id, Parser)
+		timeHandler.backFromAfk(newMember.user.id)
 	}
 })
 
@@ -228,35 +205,12 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
 		
 		const userName = newState.member.displayName
 		
-		TimeHandler.userJoined(userID, userName, Parser)
-
-    	var file = ''
-
-		if (!playing)
-		{
-			file = SoundHandler.getNextSong(Parser)
-			
-			console.log("Play file: " + file)
-
-			if (file !== '')
-			{
-				try
-				{
-					playFile(file)
-					connection = connectToChannel(newState)
-					connection.subscribe(player);
-				}
-				catch(error)
-				{
-					console.log("Failed to play sound: " + error.message)
-					return
-				}
-			}
-		}
-
+		timeHandler.userJoined(userID, userName)
+		channelManager.playFile(newState)
 	}
 	else if (oldUserChannel !== null && newUserChannel === null)
 	{
-		TimeHandler.userLeft(userID, Parser)
+		timeHandler.userLeft(userID)
 	}
 });
+	
