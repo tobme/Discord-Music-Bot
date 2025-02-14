@@ -44,8 +44,8 @@ test("userExists_hasUser_ReturnsTrue", () => {
 test("updateUser_hasUser_ReturnsUpdatedUser", () => {
     let userManager = new UserManager()
 
-    let tmpUser = new User('UserName', 0, false, 'id', new Date(), 0, "-1", 0, new Object(), new Object())
-    let updatedUser = new User('UserName', 0, true, 'id', new Date(), 0, "-1", 0, new Object(), new Object())
+    let tmpUser = new User('UserName', 0, false, 'id', new Date('2025-02-11T10:00:00.000Z'), 0, "-1", 0, new Object(), new Object())
+    let updatedUser = new User('UserName', 0, true, 'id', new Date('2025-02-11T10:00:00.000Z'), 0, "-1", 0, new Object(), new Object())
 
     userManager.addUser('ID', tmpUser)
 
