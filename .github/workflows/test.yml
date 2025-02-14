@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest  # You can change this to macos-latest or windows-latest if needed
     strategy:
       matrix:
-        node-version: [16, 18]  # You can change or add more Node.js versions here
+        node-version: [22.13.1]  # You can change or add more Node.js versions here
     
     steps:
       - name: Checkout code
