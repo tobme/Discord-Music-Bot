@@ -81,25 +81,60 @@ const rest = new REST().setToken(token);
 })();
 
 bot.on(Events.InteractionCreate, async interaction => {
-	if (!interaction.isChatInputCommand()) return;
 
 	const command = interaction.client.commands.get(interaction.commandName);
 
-	if (!command) {
-		console.error(`No command matching ${interaction.commandName} was found.`);
-		return;
+	if (command) 
+	{
+		try 
+		{
+			await command.execute(interaction, context);
+		} 
+		catch (error)
+		{
+			console.error(error);
+			if (interaction.replied || interaction.deferred) 
+			{
+				await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+			} 
+			else 
+			{
+				await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+			}
+		}
+
+		return
 	}
 
-	try {
-		await command.execute(interaction, context);
-	} catch (error) {
-		console.error(error);
-		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-		} else {
-			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-		}
+	const originalMessage = interaction.message; // Fetch the message
+	const storedCommand = originalMessage.interaction?.commandName; // Get command name from original interaction
+
+	const command2 = interaction.client.commands.get(storedCommand);
+
+	if (command2)
+	{
+		if (interaction.isStringSelectMenu()) 
+			{
+				if (command2)
+				{
+					await command2.update(interaction, context)
+				}
+				else 
+				{
+					console.error(error);
+					if (interaction.replied || interaction.deferred) 
+					{
+						await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+					} 
+					else 
+					{
+						await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+					}
+				}
+			}
 	}
+
+
 });
 
 process.on('uncaughtException', (error) => {
@@ -120,6 +155,7 @@ Parse.Cloud.afterSave("Sounds", (request) =>
 	let queueable = Boolean(request.object.get('queueable'))
 	let creatorName = request.object.get('creator')
 	let objectId = request.object.get('objectId')
+	let category = request.object.get('category')
 	name = name.substring(name.indexOf("_") + 1)
 	name = name.substring(0, name.indexOf("."))
 	
@@ -129,7 +165,7 @@ Parse.Cloud.afterSave("Sounds", (request) =>
 	}
 	else
 	{
-		playBackManger.addSong(name, file["_url"], queueable, objectId, creatorName)
+		playBackManger.addSong(name, file["_url"], queueable, objectId, creatorName, category)
 	}
 });
 

@@ -31,7 +31,8 @@ jest.mock('parse/node', function () {
                   queueable: true,
                   objectId: '123',
                   amountPlayed: 0,
-                  creator: 'noName'
+                  creator: 'noName',
+                  category: "None"
               };
               return mockData[key]; // Return null if key doesn't exist
           }),
@@ -65,7 +66,8 @@ describe('DiscordTimeHandler tests', () => {
                 queueable: true,
                 objectId: '123',
                 amountPlayed: 0,
-                creator: 'noName'
+                creator: 'noName',
+                category: "None"
             };
             return mockData[key]; // Return null if key doesn't exist
         }),
@@ -91,7 +93,8 @@ describe('DiscordTimeHandler tests', () => {
                 queueable: true,
                 objectId: '123',
                 amountPlayed: 0,
-                creator: 'noName'
+                creator: 'noName',
+                category: "None"
             };
             return mockData[key]; // Return null if key doesn't exist
         }),
@@ -109,7 +112,7 @@ describe('DiscordTimeHandler tests', () => {
 
     await musicManager.retrieveSounds(Parse)
 
-    const musicInfo = new MusicInfo('ljud', 'fakeUrl', true, 'object123', 0, 'noName')
+    const musicInfo = new MusicInfo('ljud', 'fakeUrl', true, 'object123', 0, 'noName', "None")
 
     expect(musicManager.musicList[0]).toEqual(musicInfo)
   });
@@ -118,9 +121,9 @@ describe('DiscordTimeHandler tests', () => {
 
     const musicManager = new MusicManager()
 
-    musicManager.addSong('song123', 'fakeUrl', true, '123', 'mother')
+    musicManager.addSong('song123', 'fakeUrl', true, '123', 'mother', "Rock")
 
-    const musicInfo = new MusicInfo('song123', 'fakeUrl', true, '123', 0, 'mother')
+    const musicInfo = new MusicInfo('song123', 'fakeUrl', true, '123', 0, 'mother', "Rock")
 
     expect(musicManager.musicList[0]).toEqual(musicInfo)
   });
@@ -129,11 +132,11 @@ describe('DiscordTimeHandler tests', () => {
 
     const musicManager = new MusicManager()
 
-    musicManager.addSong('song1234', 'fakeUrl', true, '123', 'mother')
+    musicManager.addSong('song1234', 'fakeUrl', true, '123', 'mother', "None")
 
-    musicManager.addSong('song1234', 'newUrl', true, '123', 'mother')
+    musicManager.addSong('song1234', 'newUrl', true, '123', 'mother', "None")
 
-    const musicInfo = new MusicInfo('song1234', 'newUrl', true, '123', 0, 'mother')
+    const musicInfo = new MusicInfo('song1234', 'newUrl', true, '123', 0, 'mother', "None")
 
     expect(musicManager.musicList[0]).toEqual(musicInfo)
   });
@@ -151,7 +154,7 @@ describe('DiscordTimeHandler tests', () => {
 
     const musicManager = new MusicManager()
 
-    musicManager.addSong('song123', 'fakeUrl', true, '123', 'mother')
+    musicManager.addSong('song123', 'fakeUrl', true, '123', 'mother', "None")
 
     musicManager.removeSong('song123')
 

@@ -22,6 +22,8 @@ class ChannelManager
 
     playFile(channel)
     {
+        if (playing) return;
+        
         const fileURL = this.playBackManger.getNextSong()
 
         const resource = createAudioResource(fileURL, { inlineVolume: true });

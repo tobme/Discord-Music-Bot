@@ -1,6 +1,6 @@
 
 class MusicInfo {
-    constructor(name, fileUrl, queueable, objectId, amountPlayed, creatorName) {
+    constructor(name, fileUrl, queueable, objectId, amountPlayed, creatorName, category) {
         this.name = name
         this.fileUrl = fileUrl
         this.queueable= queueable
@@ -8,6 +8,7 @@ class MusicInfo {
         this.amountPlayed = amountPlayed
         this.updated = false
         this.creatorName = creatorName
+        this.category = category
     }
 }
 

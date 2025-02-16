@@ -2,6 +2,110 @@
 const { ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, SlashCommandBuilder } = require('discord.js')
 const {convertToTime} = require('../../TimeHandling/TimeConverter.js')
 
+function getMenuBuilders(year, month, day)
+{
+    const selectYear = new StringSelectMenuBuilder()
+    .setCustomId('year')
+    .setPlaceholder(year)
+    .addOptions(
+        new StringSelectMenuOptionBuilder()
+            .setLabel('All')
+            .setValue('All'),
+        new StringSelectMenuOptionBuilder()
+            .setLabel('2024')
+            .setValue('2024'),
+        new StringSelectMenuOptionBuilder()
+            .setLabel('2025')
+            .setValue('2025'),
+        new StringSelectMenuOptionBuilder()
+            .setLabel('2026')
+            .setValue('2026'),
+        new StringSelectMenuOptionBuilder()
+            .setLabel('2027')
+            .setValue('2027'),
+        new StringSelectMenuOptionBuilder()
+            .setLabel('2028')
+            .setValue('2028'),
+        new StringSelectMenuOptionBuilder()
+            .setLabel('2029')
+            .setValue('2029'),
+        new StringSelectMenuOptionBuilder()
+            .setLabel('2030')
+            .setValue('2030'),
+    );
+
+    const selectMonth = new StringSelectMenuBuilder()
+        .setCustomId('month')
+        .setPlaceholder(month)
+        .addOptions(
+            new StringSelectMenuOptionBuilder()
+                .setLabel('All')
+                .setValue('All'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('Januari')
+                .setValue('Januari'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('Februari')
+                .setValue('Februari'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('Mars')
+                .setValue('Mars'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('April')
+                .setValue('April'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('Maj')
+                .setValue('Maj'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('Juni')
+                .setValue('Juni'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('Juli')
+                .setValue('Juli'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('Augusti')
+                .setValue('Augusti'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('September')
+                .setValue('September'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('Oktober')
+                .setValue('Oktober'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('November')
+                .setValue('November'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('December')
+                .setValue('December'),
+        );
+
+    const selectDay = new StringSelectMenuBuilder()
+        .setCustomId('day')
+        .setPlaceholder(day)
+        .addOptions(
+            new StringSelectMenuOptionBuilder()
+                .setLabel('All')
+                .setValue('All'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('1-7')
+                .setValue('1-7'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('8-15')
+                .setValue('8-15'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('16-23')
+                .setValue('16-23'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('24-31')
+                .setValue('24-31'),
+        );
+
+        const row = new ActionRowBuilder().addComponents(selectYear);
+        const row2 = new ActionRowBuilder().addComponents(selectMonth)
+        const row3 = new ActionRowBuilder().addComponents(selectDay)
+
+    return [row, row2, row3];
+}
 
 async function getLongestAway(user)
 {
@@ -41,15 +145,60 @@ async function getLongestAway(user)
     }
 }
 
-function getTotalTime(user)
+function getUserObject(object, selectionString)
 {
-    let time = user.time
+    if (selectionString == 'All')
+        return object
 
-    for (const [key, years] of Object.entries(user.timeObject))
+    let retObject = new Object()
+
+    for (const [key, val] of Object.entries(object))
     {
-        for (const [key2, month] of Object.entries(years))
+        if (selectionString.includes(key))
+            retObject[key] = val
+    }
+
+    return retObject
+}
+
+function splitDay(daySelection)
+{
+    const tmpSplit = daySelection.split('-')
+    let tmp = []
+    for (let i = Number(tmpSplit[0]); i <= Number(tmpSplit[1]); i++)
+    {
+        let string = ''
+        if (i < 10)
+            string += '0'
+        string += String(i)
+        tmp.push(string)
+    }
+    return tmp
+}
+
+function getUserTime(user, yearSelection, monthSelection, daySelection)
+{
+    let time = 0
+
+    if (yearSelection == 'All' && monthSelection == 'All' && daySelection == 'All')
+        time += user.time
+
+    if (daySelection != 'All')
+    {
+        daySelection = splitDay(daySelection)
+    }
+
+    const selectedYears = getUserObject(user.timeObject, [yearSelection])
+
+    for (const [key, years] of Object.entries(selectedYears))
+    {
+        const selectedMonths = getUserObject(years, [monthSelection])
+
+        for (const [key2, month] of Object.entries(selectedMonths))
         {
-            for (const [key2, day] of Object.entries(month))
+            const selectedDays = getUserObject(month, daySelection)
+
+            for (const [key2, day] of Object.entries(selectedDays))
             {
                 time += Number(day)
             }
@@ -57,6 +206,43 @@ function getTotalTime(user)
     }
 
     return time
+}
+
+async function getUserTimesScoreboard(personsInDiscord, year, month, day)
+{
+    var out = new Array()
+                  
+    for (const person in personsInDiscord)
+    {
+        let time = getUserTime(personsInDiscord[person], year, month, day)
+        out.push( {"name": personsInDiscord[person].userName, "InDiscord": personsInDiscord[person].InDiscord, "time": time, "sessionTime": personsInDiscord[person].sessionTime, "leftTime": personsInDiscord[person].leftTime, "longestAway": personsInDiscord[person].longestAway} )
+    }
+    
+    out.sort(function(a, b){return Number(b.time) - Number(a.time) });
+    
+    var string = " P |    Name    |    Time     | sessionTime  | Longest Away\n"
+    string    += '------------------------------------------------------------\n'
+    
+    for (let i = 0; i < out.length; i++)
+    {
+      string += String(i+1).padEnd(2) + " | "
+      
+      let tmpName = out[i].name.padEnd(10, " ")
+      string += tmpName + "   "
+      
+      let tmpTime = convertToTime(out[i].time).padEnd(11, " ")
+      string += tmpTime + "   "
+      
+      let tmpSessionTime = convertToTime(out[i].sessionTime) .padEnd(11, " ")
+      string += tmpSessionTime + "   "
+      
+      let tmpLongestAwayStr = await getLongestAway(out[i])
+      tmpLongestAwayStr = Number(tmpLongestAwayStr)
+      let tmpLongestAway = tmpLongestAwayStr !== 0 ? convertToTime(tmpLongestAwayStr).padEnd(11, " ") : String("No Data").padEnd(11, " ")
+      string += tmpLongestAway + '\n'
+    }
+
+    return string
 }
 
 module.exports = {
@@ -71,223 +257,50 @@ module.exports = {
 
         var personsInDiscord = timeHandler.getDiscordTimes()
     
-        var out = new Array()
-                  
-        for (const person in personsInDiscord)
-        {
-            let time = getTotalTime(personsInDiscord[person])
-            out.push( {"name": personsInDiscord[person].userName, "InDiscord": personsInDiscord[person].InDiscord, "time": time, "sessionTime": personsInDiscord[person].sessionTime, "leftTime": personsInDiscord[person].leftTime, "longestAway": personsInDiscord[person].longestAway} )
-        }
-        
-        out.sort(function(a, b){return Number(b.time) - Number(a.time) });
-        
-        var string = " P |    Name    |    Time     | sessionTime  | Longest Away\n"
-        string    += '------------------------------------------------------------\n'
-        
-        for (let i = 0; i < out.length; i++)
-        {
-          string += String(i+1).padEnd(2) + " | "
-          
-          let tmpName = out[i].name.padEnd(10, " ")
-          string += tmpName + "   "
-          
-          let tmpTime = convertToTime(out[i].time).padEnd(11, " ")
-          string += tmpTime + "   "
-          
-          let tmpSessionTime = convertToTime(out[i].sessionTime) .padEnd(11, " ")
-          string += tmpSessionTime + "   "
-          
-          let tmpLongestAwayStr = await getLongestAway(out[i])
-          tmpLongestAwayStr = Number(tmpLongestAwayStr)
-          let tmpLongestAway = tmpLongestAwayStr !== 0 ? convertToTime(tmpLongestAwayStr).padEnd(11, " ") : String("No Data").padEnd(11, " ")
-          string += tmpLongestAway + '\n'
-        }
+        var string = await getUserTimesScoreboard(personsInDiscord, 'All', 'All', 'All')
 
-        // 
-
-        const selectYear = new StringSelectMenuBuilder()
-            .setCustomId('year')
-            .setPlaceholder('All')
-            .addOptions(
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('All')
-                    .setValue('All'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('2024')
-                    .setValue('2024'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('2025')
-                    .setValue('2025'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('2026')
-                    .setValue('2026'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('2027')
-                    .setValue('2027'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('2028')
-                    .setValue('2028'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('2029')
-                    .setValue('2029'),
-            );
-
-        const selectMonth = new StringSelectMenuBuilder()
-            .setCustomId('month')
-            .setPlaceholder('All')
-            .addOptions(
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('All')
-                    .setValue('All'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('Januari')
-                    .setValue('1'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('Februari')
-                    .setValue('2'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('Mars')
-                    .setValue('3'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('April')
-                    .setValue('4'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('Maj')
-                    .setValue('5'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('Juni')
-                    .setValue('6'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('Juli')
-                    .setValue('7'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('Augusti')
-                    .setValue('8'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('September')
-                    .setValue('9'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('Oktober')
-                    .setValue('10'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('November')
-                    .setValue('11'),
-                new StringSelectMenuOptionBuilder()
-                    .setLabel('December')
-                    .setValue('12'),
-            );
-
-        const selectDay = new StringSelectMenuBuilder()
-			.setCustomId('day')
-			.setPlaceholder('All')
-			.addOptions(
-				new StringSelectMenuOptionBuilder()
-					.setLabel('All')
-					.setValue('All'),
-				new StringSelectMenuOptionBuilder()
-					.setLabel('1')
-					.setValue('1'),
-				new StringSelectMenuOptionBuilder()
-					.setLabel('2')
-					.setValue('2'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('3')
-					.setValue('3'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('4')
-					.setValue('4'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('5')
-					.setValue('5'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('6')
-					.setValue('6'),
-				new StringSelectMenuOptionBuilder()
-					.setLabel('7')
-					.setValue('7'),
-				new StringSelectMenuOptionBuilder()
-					.setLabel('8')
-					.setValue('8'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('9')
-					.setValue('9'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('10')
-					.setValue('10'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('11')
-					.setValue('11'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('12')
-					.setValue('12'),
-				new StringSelectMenuOptionBuilder()
-					.setLabel('13')
-					.setValue('13'),
-				new StringSelectMenuOptionBuilder()
-					.setLabel('14')
-					.setValue('14'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('15')
-					.setValue('15'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('16')
-					.setValue('16'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('17')
-					.setValue('17'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('18')
-					.setValue('18'),
-				new StringSelectMenuOptionBuilder()
-					.setLabel('19')
-					.setValue('19'),
-				new StringSelectMenuOptionBuilder()
-					.setLabel('20')
-					.setValue('20'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('21')
-					.setValue('21'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('22')
-					.setValue('22'),
-                    /*
-                new StringSelectMenuOptionBuilder()
-					.setLabel('23')
-					.setValue('23'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('24')
-					.setValue('24'),
-				new StringSelectMenuOptionBuilder()
-					.setLabel('25')
-					.setValue('25'),
-				new StringSelectMenuOptionBuilder()
-					.setLabel('26')
-					.setValue('26'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('27')
-					.setValue('27'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('28')
-					.setValue('28'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('29')
-					.setValue('29'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('30')
-					.setValue('30'),
-                new StringSelectMenuOptionBuilder()
-					.setLabel('31')
-					.setValue('31'),
-                    */
-			);
-        
-        const row = new ActionRowBuilder().addComponents(selectYear);
-        const row2 = new ActionRowBuilder().addComponents(selectMonth)
-        const row3 = new ActionRowBuilder().addComponents(selectDay)
+        var menuBuilders = getMenuBuilders('All', 'All', 'All')
 
         if (string != '')
         {
-            await interaction.reply({"content": string, components: [row, row2, row3], ephemeral: false});
+            await interaction.reply({"content": string, components: menuBuilders, ephemeral: false});
         }
+    },
+
+    async update(interaction, context)
+    {
+        const originalUserId = interaction.message.interaction?.user.id;
+
+        if (interaction.user.id !== originalUserId) {
+            return await interaction.reply({
+                content: "❌ You cannot update this menu. Only the original user can interact!",
+                ephemeral: true
+            });
+        }
+
+        var {timeHandler} = context;
+
+        var personsInDiscord = timeHandler.getDiscordTimes()
+
+        const yearData = interaction.message.components[0]['components'][0]['data']
+        const monthData = interaction.message.components[1]['components'][0]['data']
+        const dayData = interaction.message.components[2]['components'][0]['data']
+
+        let year = yearData['placeholder']
+        let month = monthData['placeholder']
+        let day = dayData['placeholder']
+
+        if (interaction.customId == yearData['custom_id'])
+            year = interaction.values[0]
+        if (interaction.customId == monthData['custom_id'])
+            month = interaction.values[0]
+        if (interaction.customId == dayData['custom_id'])
+            day = interaction.values[0]
+
+        const menuBuilders = getMenuBuilders(year, month, day)
+
+        var contentString = await getUserTimesScoreboard(personsInDiscord, year, month, day)
+
+        await interaction.update({"content": contentString, components: menuBuilders, ephemeral: false})
     }
 }

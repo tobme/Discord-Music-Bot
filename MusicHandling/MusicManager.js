@@ -20,25 +20,26 @@ class MusicManager {
             let objectId = thisObject.id
             let amountPlayed = thisObject.get("amountPlayed")
             let creatorName = thisObject.get("creator")
+            let category = thisObject.get("category")
 
             if (approved && file) {
                 name = name.substring(name.indexOf("_") + 1, name.lastIndexOf("."))
 
-                const musicInfo = new MusicInfo(name, file["_url"], queueable, objectId, amountPlayed, creatorName)
+                const musicInfo = new MusicInfo(name, file["_url"], queueable, objectId, amountPlayed, creatorName, category)
                 this.musicList.push(musicInfo)
             }
         })
     }
 
-    addSong(songName, fileUrl, queueable, objectId, creatorName) {
+    addSong(songName, fileUrl, queueable, objectId, creatorName, category) {
         const found = this.musicList.find(element => element.name === songName)
 
         if (!found) {
             console.log("Adding file: " + songName)
-            this.musicList.push(new MusicInfo(songName, fileUrl, queueable, objectId, 0, creatorName))
+            this.musicList.push(new MusicInfo(songName, fileUrl, queueable, objectId, 0, creatorName, category))
         } else {
             console.log("Updating file: " + songName)
-            Object.assign(found, { name: songName, fileUrl, queueable, objectId, creatorName })
+            Object.assign(found, { name: songName, fileUrl, queueable, objectId, creatorName, category })
         }
     }
 
