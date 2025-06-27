@@ -15,7 +15,7 @@ class TimeTracker {
 
         user.leftTime = currentTime.toISOString();
         if (timeSinceLeft > Number(user.longestAway)) {
-            user.longestAway = timeSinceLeft.toString();
+            user.longestAway = timeSinceLeft;
             this.saveUserTime(userID, { longestAway: user.longestAway, leftTime: user.leftTime });
         }
     }
@@ -33,7 +33,7 @@ class TimeTracker {
         user.leftTime = currentTime.toISOString();
 
         this.trackTimeObject(user.timeObject, elapsedTime);
-        this.saveUserTime(userID, { timeObject: user.timeObject, sessionTime: user.sessionTime, leftTime: user.leftTime });
+        this.saveUserTime(userID, { timeObject: user.timeObject, sessionTime: user.sessionTime, leftTime: user.leftTime, discordID: userID, name: user.userName, time: user.time });
     }
 
     updateFarmingTime(userID)

@@ -323,7 +323,7 @@ describe('DiscordTimeHandler tests', () => {
               }),
             },
           };
-        interaction = MockInteraction({values: '02', customId: 'month'})
+        interaction = MockInteraction({values: 'Februari', customId: 'month'})
 
         await update(interaction, context)
   
@@ -381,7 +381,7 @@ describe('DiscordTimeHandler tests', () => {
             },
           };
 
-        interaction = MockInteraction({values: '8-15', customId: 'day', yearHolder: '2024', monthHolder: '05'})
+        interaction = MockInteraction({values: '8-15', customId: 'day', yearHolder: '2024', monthHolder: 'Maj'})
 
         await update(interaction, context)
   

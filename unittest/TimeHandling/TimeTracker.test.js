@@ -106,7 +106,7 @@ describe('DiscordTimeHandler tests', () => {
         timeTracker.updateLongestAway('id')
 
         expect(Parse.Object).toHaveBeenCalledTimes(1)
-        expect(user.longestAway).toBe("30")
+        expect(user.longestAway).toBe(30)
     });
 
     test("updateTime_sessionTime30_ExpectSessionTime50", () => {

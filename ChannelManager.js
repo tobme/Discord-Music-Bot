@@ -22,7 +22,7 @@ class ChannelManager
 
     playFile(channel)
     {
-        if (playing) return;
+        if (this.playing) return;
         
         const fileURL = this.playBackManger.getNextSong()
 

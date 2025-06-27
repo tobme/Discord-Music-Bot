@@ -13,13 +13,13 @@ module.exports = {
 
     async execute(interaction, context) 
     {
-        const {playBackManager} = context;
+        const {playBackManger} = context;
 
         let songName = interaction.options.get('name').value
 
         console.log("Trying to add %s...", songName)
 
-        var success = playBackManager.addQueue(songName)
+        var success = playBackManger.addQueue(songName)
 
         if (success)
         {

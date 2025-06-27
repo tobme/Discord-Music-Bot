@@ -15,15 +15,13 @@ class PlaybackManager {
                 : this.shuffleManager.getShuffledSong()
         }
 
-        console.log("2 " + song)
-
         this.updateSongCounter(song)
         return song
     }
 
     addQueue(songName)
     {
-        this.queueManager.addQueue(songName)
+        return this.queueManager.addQueue(songName)
     }
 
     addSong(songName, fileUrl, queueable, objectId, creatorName)

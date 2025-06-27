@@ -188,6 +188,10 @@ function getUserTime(user, yearSelection, monthSelection, daySelection)
         daySelection = splitDay(daySelection)
     }
 
+    const monthToInt = {'All': 'All', 'Januari': '01', 'Februari': '02', 'Mars': '03', 'April': '04', 'Maj': '05', 'Juni': '06', 'Juli': '07', 'Augusti': '08', 'September': '09', 'Oktober': '10', 'November': '11', 'December': '12'};
+
+    monthSelection = monthToInt[monthSelection]
+
     const selectedYears = getUserObject(user.timeObject, [yearSelection])
 
     for (const [key, years] of Object.entries(selectedYears))
