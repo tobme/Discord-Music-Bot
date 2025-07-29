@@ -53,6 +53,9 @@ jobs:
         env:
           B4A_ACCOUNT_KEY: ${{ secrets.B4A_ACCOUNT_KEY }}
 
+      - name: Initialize Back4App project
+        run: b4a init --no-interactive
+
       - name: Init Back4App project config
         run: |
           mkdir -p .back4app
@@ -68,7 +71,6 @@ jobs:
           ls -la
           test -f .back4app/project.json || (echo "Missing project.json" && exit 1)
           test -d cloud || (echo "Missing cloud/ folder" && exit 1)
-
 
       - name: Debug
         run: |
