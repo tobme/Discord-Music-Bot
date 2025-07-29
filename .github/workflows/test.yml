@@ -47,11 +47,21 @@ jobs:
       - name: Install parse cli
         run: curl https://raw.githubusercontent.com/back4app/parse-cli/back4app/installer.sh | sudo bash
 
+      - name: Init Back4App project config
+        run: |
+          mkdir -p .back4app
+          echo '{
+            "appId": "${{ secrets.B4A_APP_ID_DEV }}",
+            "appName": "MyApp",
+            "language": "JavaScript",
+            "version": "1.0.0"
+          }' > .back4app/project.json
+
       - name: Set up Back4App CLI
         run: |
           echo "$B4A_ACCOUNT_KEY" | b4a configure accountkey
         env:
-          B4A_ACCOUNT_KEY: ${{ secrets.B4A_ACCOUNT_KEY_DEV }}
+          B4A_ACCOUNT_KEY: ${{ secrets.B4A_ACCOUNT_KEY }}
           
       - name: Deploy to Back4App
         run: b4a deploy
