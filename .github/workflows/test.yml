@@ -62,6 +62,12 @@ jobs:
             "language": "JavaScript",
             "version": "1.0.0"
           }' > .back4app/project.json
-          
+
+      - name: Verify required files exist
+        run: |
+          ls -la
+          test -f .back4app/project.json || (echo "Missing project.json" && exit 1)
+          test -d cloud || (echo "Missing cloud/ folder" && exit 1)
+                  
       - name: Deploy to Back4App
         run: b4a deploy
