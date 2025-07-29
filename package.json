@@ -1,0 +1,8 @@
+{
+  "name": "my-parse-project",
+  "version": "1.0.0",
+  "main": "cloud/app.js",
+  "scripts": {
+    "start": "node cloud/server.js"
+  }
+}
