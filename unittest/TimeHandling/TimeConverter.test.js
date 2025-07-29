@@ -1,4 +1,4 @@
-const {convertToTime} = require('../../TimeHandling/TimeConverter.js')
+const {convertToTime} = require('../../cloud/TimeHandling/TimeConverter.js')
 
 describe('DiscordTimeHandler tests', () => {
 

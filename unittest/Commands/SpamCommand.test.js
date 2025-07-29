@@ -1,4 +1,4 @@
-const {execute} = require('../../commands/utility/spamCommand.js')
+const {execute} = require('../../cloud/commands/utility/spamCommand.js')
 
 
 describe('DiscordTimeHandler tests', () => {

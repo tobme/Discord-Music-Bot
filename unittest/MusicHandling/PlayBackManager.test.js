@@ -1,8 +1,8 @@
-const PlaybackManager = require('../../MusicHandling/PlayBackManager.js')
-const MusicInfo = require('../../MusicHandling/MusicInfo.js')
-const MusicManager = require('../../MusicHandling/MusicManager.js')
-const QueueManager = require('../../MusicHandling/QueueManager.js')
-const ShuffleManager = require('../../MusicHandling/ShuffleManager.js')
+const PlaybackManager = require('../../cloud/MusicHandling/PlayBackManager.js')
+const MusicInfo = require('../../cloud/MusicHandling/MusicInfo.js')
+const MusicManager = require('../../cloud/MusicHandling/MusicManager.js')
+const QueueManager = require('../../cloud/MusicHandling/QueueManager.js')
+const ShuffleManager = require('../../cloud/MusicHandling/ShuffleManager.js')
 const Parse = require('parse/node')
 
 jest.mock('../../MusicHandling/MusicManager', () => {

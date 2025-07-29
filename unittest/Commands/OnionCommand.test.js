@@ -1,4 +1,4 @@
-const {execute, update} = require('../../commands/utility/onionCommand.js')
+const {execute, update} = require('../../cloud/commands/utility/onionCommand.js')
 
 const MockInteraction = (options = {}) => {
   return {
@@ -34,7 +34,7 @@ describe('DiscordTimeHandler tests', () => {
         context = {
           timeHandler: {
             getDiscordTimes: jest.fn().mockReturnValue({
-              user1: { userName: 'Alice', InDiscord: true, time: 3600, sessionTime: 1200, leftTime: 500, longestAway: 600, timeObject: {} }
+              user1: { userName: 'Alice', InDiscord: true, time: 3600, sessionTime: 1200, leftTime: 500, longestAway: 600, timeObject: {}}
             }),
           },
         };
@@ -49,18 +49,21 @@ describe('DiscordTimeHandler tests', () => {
 
       await execute(interaction, context)
 
-      let expectedRes = " P |    Name    |    Time     | sessionTime  | Longest Away\n"
-      expectedRes    += '------------------------------------------------------------\n'
+      let expectedRes = " P | Name                | Time        | sessionTime | Longest Away | Streak \n"
+      expectedRes    += '-----------------------------------------------------------------------------\n'
 
       expectedRes += String(1).padEnd(2) + " | "
-      expectedRes += 'Alice'.padEnd(10, " ") + "   "
-      expectedRes += '2d 12h '.padEnd(11, " ") + "   "
-      expectedRes += '20h '.padEnd(11, " ") + "   "
-      expectedRes += '10h '.padEnd(11, " ")
+      expectedRes += 'Alice'.padEnd(20, " ") + "  "
+      expectedRes += '2d 12h '.padEnd(12, " ") + "  "
+      expectedRes += '20h '.padEnd(12, " ") + "  "
+      expectedRes += '10h '.padEnd(13, " ") + "  "
+      expectedRes += '0'.padEnd(6, " ")
       expectedRes += '\n'
+
+      const contentString = "```" + expectedRes + "```"
   
       expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({
-        content: expectedRes,
+        content: contentString,
       }))
     });
 
@@ -77,25 +80,29 @@ describe('DiscordTimeHandler tests', () => {
 
         await execute(interaction, context)
   
-        let expectedRes = " P |    Name    |    Time     | sessionTime  | Longest Away\n"
-        expectedRes    += '------------------------------------------------------------\n'
+        let expectedRes = " P | Name                | Time        | sessionTime | Longest Away | Streak \n"
+        expectedRes    += '-----------------------------------------------------------------------------\n'
   
         expectedRes += String(1).padEnd(2) + " | "
-        expectedRes += 'Alice'.padEnd(10, " ") + "   "
-        expectedRes += '2d 12h '.padEnd(11, " ") + "   "
-        expectedRes += '20h '.padEnd(11, " ") + "   "
-        expectedRes += '10h '.padEnd(11, " ")
+        expectedRes += 'Alice'.padEnd(20, " ") + "  "
+        expectedRes += '2d 12h '.padEnd(12, " ") + "  "
+        expectedRes += '20h '.padEnd(12, " ") + "  "
+        expectedRes += '10h '.padEnd(13, " ") + "  "
+        expectedRes += '0'.padEnd(6, " ")
         expectedRes += '\n'
 
         expectedRes += String(2).padEnd(2) + " | "
-        expectedRes += 'Bobby'.padEnd(10, " ") + "   "
-        expectedRes += '30m'.padEnd(11, " ") + "   "
-        expectedRes += '20m'.padEnd(11, " ") + "   "
-        expectedRes += 'No Data'.padEnd(11, " ")
+        expectedRes += 'Bobby'.padEnd(20, " ") + "  "
+        expectedRes += '30m'.padEnd(12, " ") + "  "
+        expectedRes += '20m'.padEnd(12, " ") + "  "
+        expectedRes += 'No Data'.padEnd(13, " ") + "  "
+        expectedRes += '0'.padEnd(6, " ")
         expectedRes += '\n'
+
+        const contentString = "```" + expectedRes + "```"
     
         expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({
-          content: expectedRes,
+          content: contentString,
         }))
       });
 
@@ -112,22 +119,25 @@ describe('DiscordTimeHandler tests', () => {
           const leftDate = new Date('2025-02-11T10:00:00.000Z');
           const currentDate = new Date('2025-02-11T10:30:00.000Z');
 
-          jest.spyOn(global, 'Date').mockImplementationOnce(() => leftDate).mockImplementationOnce(() => currentDate);
+          jest.spyOn(global, 'Date').mockImplementationOnce(() => leftDate).mockImplementationOnce(() => leftDate).mockImplementationOnce(() => currentDate);
 
         await execute(interaction, context)
   
-        let expectedRes = " P |    Name    |    Time     | sessionTime  | Longest Away\n"
-        expectedRes    += '------------------------------------------------------------\n'
+        let expectedRes = " P | Name                | Time        | sessionTime | Longest Away | Streak \n"
+        expectedRes    += '-----------------------------------------------------------------------------\n'
   
         expectedRes += String(1).padEnd(2) + " | "
-        expectedRes += 'Alice'.padEnd(10, " ") + "   "
-        expectedRes += '2d 12h '.padEnd(11, " ") + "   "
-        expectedRes += '20h '.padEnd(11, " ") + "   "
-        expectedRes += '30m'.padEnd(11, " ")
+        expectedRes += 'Alice'.padEnd(20, " ") + "  "
+        expectedRes += '2d 12h '.padEnd(12, " ") + "  "
+        expectedRes += '20h '.padEnd(12, " ") + "  "
+        expectedRes += '30m '.padEnd(13, " ") + "  "
+        expectedRes += '0'.padEnd(6, " ")
         expectedRes += '\n'
-    
+
+        const contentString = "```" + expectedRes + "```"
+
         expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({
-          content: expectedRes,
+          content: contentString,
         }))
       });
 
@@ -144,22 +154,25 @@ describe('DiscordTimeHandler tests', () => {
           const leftDate = new Date('2025-02-11T10:00:00.000Z');
           const currentDate = new Date('2025-02-11T10:30:00.000Z');
 
-          jest.spyOn(global, 'Date').mockImplementationOnce(() => leftDate).mockImplementationOnce(() => currentDate);
+          jest.spyOn(global, 'Date').mockImplementationOnce(() => leftDate).mockImplementationOnce(() => leftDate).mockImplementationOnce(() => currentDate);
 
         await execute(interaction, context)
   
-        let expectedRes = " P |    Name    |    Time     | sessionTime  | Longest Away\n"
-        expectedRes    += '------------------------------------------------------------\n'
+        let expectedRes = " P | Name                | Time        | sessionTime | Longest Away | Streak \n"
+        expectedRes    += '-----------------------------------------------------------------------------\n'
   
         expectedRes += String(1).padEnd(2) + " | "
-        expectedRes += 'Alice'.padEnd(10, " ") + "   "
-        expectedRes += '2d 12h '.padEnd(11, " ") + "   "
-        expectedRes += '20h '.padEnd(11, " ") + "   "
-        expectedRes += '40m'.padEnd(11, " ")
+        expectedRes += 'Alice'.padEnd(20, " ") + "  "
+        expectedRes += '2d 12h '.padEnd(12, " ") + "  "
+        expectedRes += '20h '.padEnd(12, " ") + "  "
+        expectedRes += '40m '.padEnd(13, " ") + "  "
+        expectedRes += '0'.padEnd(6, " ")
         expectedRes += '\n'
+
+        const contentString = "```" + expectedRes + "```"
     
         expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({
-          content: expectedRes,
+          content: contentString,
         }))
       });
 
@@ -176,22 +189,25 @@ describe('DiscordTimeHandler tests', () => {
           const leftDate = new Date('2024-02-11T10:00:00.000Z');
           const currentDate = new Date('2025-02-11T10:30:00.000Z');
 
-          jest.spyOn(global, 'Date').mockImplementationOnce(() => leftDate).mockImplementationOnce(() => currentDate);
+          jest.spyOn(global, 'Date').mockImplementationOnce(() => leftDate).mockImplementationOnce(() => leftDate).mockImplementationOnce(() => currentDate);
 
         await execute(interaction, context)
   
-        let expectedRes = " P |    Name    |    Time     | sessionTime  | Longest Away\n"
-        expectedRes    += '------------------------------------------------------------\n'
+        let expectedRes = " P | Name                | Time        | sessionTime | Longest Away | Streak \n"
+        expectedRes    += '-----------------------------------------------------------------------------\n'
   
         expectedRes += String(1).padEnd(2) + " | "
-        expectedRes += 'Alice'.padEnd(10, " ") + "   "
-        expectedRes += '2d 12h '.padEnd(11, " ") + "   "
-        expectedRes += '20h '.padEnd(11, " ") + "   "
-        expectedRes += '40m'.padEnd(11, " ")
+        expectedRes += 'Alice'.padEnd(20, " ") + "  "
+        expectedRes += '2d 12h '.padEnd(12, " ") + "  "
+        expectedRes += '20h '.padEnd(12, " ") + "  "
+        expectedRes += '40m '.padEnd(13, " ") + "  "
+        expectedRes += '0'.padEnd(6, " ")
         expectedRes += '\n'
+
+        const contentString = "```" + expectedRes + "```"
     
         expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({
-          content: expectedRes,
+          content: contentString,
         }))
       });
 
@@ -207,22 +223,25 @@ describe('DiscordTimeHandler tests', () => {
 
         await execute(interaction, context)
   
-        let expectedRes = " P |    Name    |    Time     | sessionTime  | Longest Away\n"
-        expectedRes    += '------------------------------------------------------------\n'
+        let expectedRes = " P | Name                | Time        | sessionTime | Longest Away | Streak \n"
+        expectedRes    += '-----------------------------------------------------------------------------\n'
   
         expectedRes += String(1).padEnd(2) + " | "
-        expectedRes += 'Alice'.padEnd(10, " ") + "   "
-        expectedRes += '2d 12h 30m'.padEnd(11, " ") + "   "
-        expectedRes += '20h '.padEnd(11, " ") + "   "
-        expectedRes += '40m'.padEnd(11, " ")
+        expectedRes += 'Alice'.padEnd(20, " ") + "  "
+        expectedRes += '2d 12h 30m'.padEnd(12, " ") + "  "
+        expectedRes += '20h '.padEnd(12, " ") + "  "
+        expectedRes += '40m '.padEnd(13, " ") + "  "
+        expectedRes += '1'.padEnd(6, " ")
         expectedRes += '\n'
+
+        const contentString = "```" + expectedRes + "```"
     
         expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({
-          content: expectedRes,
+          content: contentString,
         }))
       });
 
-      test('execute_timeObject30m_expectTimeObjectAdded', async () => {
+      test('execute_timeObject1h37m_expectTimeObjectAdded', async () => {
 
         context = {
             timeHandler: {
@@ -234,18 +253,99 @@ describe('DiscordTimeHandler tests', () => {
 
         await execute(interaction, context)
   
-        let expectedRes = " P |    Name    |    Time     | sessionTime  | Longest Away\n"
-        expectedRes    += '------------------------------------------------------------\n'
+        let expectedRes = " P | Name                | Time        | sessionTime | Longest Away | Streak \n"
+        expectedRes    += '-----------------------------------------------------------------------------\n'
   
         expectedRes += String(1).padEnd(2) + " | "
-        expectedRes += 'Alice'.padEnd(10, " ") + "   "
-        expectedRes += '2d 13h 37m'.padEnd(11, " ") + "   "
-        expectedRes += '20h '.padEnd(11, " ") + "   "
-        expectedRes += '40m'.padEnd(11, " ")
+        expectedRes += 'Alice'.padEnd(20, " ") + "  "
+        expectedRes += '2d 13h 37m'.padEnd(12, " ") + "  "
+        expectedRes += '20h '.padEnd(12, " ") + "  "
+        expectedRes += '40m '.padEnd(13, " ") + "  "
+        expectedRes += '2'.padEnd(6, " ")
         expectedRes += '\n'
+
+        const contentString = "```" + expectedRes + "```"
     
         expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({
-          content: expectedRes,
+          content: contentString,
+        }))
+      });
+
+      test.each([
+        [{'2024': {'02': {'27': 30, '28': 0}}}, 2],
+        [{'2024': {'02': {'27': 30, '28': 0, '29': 0}, '03': {'01': 0, '02': 0, '03': 0, '04': 0}}}, 7],
+        [{'2024': {'02': {'27': 30, '28': 0}, '06': {'30': 0}, '07': {'05': 0, '07': 0, '08': 0, '09': 0}}}, 3],
+        [{'2024': {'12': {'30': 30, '31': 0}}, '2025': {'01' : {'01': 0, '02': 0, '03': 0}}}, 5],
+      ])('execute_timeObject6dayStreak_expect6DayStreak', async (timeobj, result) => {
+
+        context = {
+            timeHandler: {
+              getDiscordTimes: jest.fn().mockReturnValue({
+                user1: { userName: 'Alice', InDiscord: true, time: 3600, sessionTime: 1200, leftTime: new Date('2025-02-11T10:00:00.000Z'), longestAway: 40, timeObject: timeobj },
+              }),
+            },
+          };
+
+        await execute(interaction, context)
+  
+        let expectedRes = " P | Name                | Time        | sessionTime | Longest Away | Streak \n"
+        expectedRes    += '-----------------------------------------------------------------------------\n'
+  
+        expectedRes += String(1).padEnd(2) + " | "
+        expectedRes += 'Alice'.padEnd(20, " ") + "  "
+        expectedRes += '2d 12h 30m'.padEnd(12, " ") + "  "
+        expectedRes += '20h '.padEnd(12, " ") + "  "
+        expectedRes += '40m '.padEnd(13, " ") + "  "
+        expectedRes += String(result).padEnd(6, " ")
+        expectedRes += '\n'
+
+        const contentString = "```" + expectedRes + "```"
+    
+        expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({
+          content: contentString,
+        }))
+      });
+
+            test.each([
+        ['All', 'All', 'All', 7],
+        ['All', 'All', '2025', 5],
+        ['All', 'December', 'All', 3],
+        ['All', 'December', '2024', 2],
+        ['All', 'Maj', '2024', 3],
+        ['1-7', 'Maj', '2024', 2],
+        ['8-15', 'Maj', '2024', 3],
+        ['16-23', 'Maj', '2024', 0],
+      ])('update_timeObject6dayStreak_expect6DayStreak', async (day, month, year, result) => {
+
+        timeobj = {'2024': {'05': {'01': 0, '02': 0, '10': 0, '11': 0, '12': 0}, '12': {'30': 0, '31': 0}}, '2025': {'01' : {'01': 0, '02': 0, '03': 0, '04': 0, '05': 0}, '12': {'29': 0, '30': 0, '31': 0}}}
+
+        context = {
+            timeHandler: {
+              getDiscordTimes: jest.fn().mockReturnValue({
+                user1: { userName: 'Alice', InDiscord: true, time: 0, sessionTime: 1200, leftTime: new Date('2025-02-11T10:00:00.000Z'), longestAway: 40, timeObject: timeobj },
+              }),
+            },
+          };
+
+        interaction = MockInteraction({values: day, customId: 'day', yearHolder: year, monthHolder: month})
+
+        await update(interaction, context)
+  
+        let expectedRes = " P | Name                | Time        | sessionTime | Longest Away | Streak \n"
+        expectedRes    += '-----------------------------------------------------------------------------\n'
+  
+        expectedRes += String(1).padEnd(2) + " | "
+        expectedRes += 'Alice'.padEnd(20, " ") + "  "
+        expectedRes += '0m'.padEnd(12, " ") + "  "
+        expectedRes += '20h '.padEnd(12, " ") + "  "
+        expectedRes += '40m '.padEnd(13, " ") + "  "
+        expectedRes += String(result).padEnd(6, " ")
+        expectedRes += '\n'
+
+        const contentString = "```" + expectedRes + "```"
+    
+        expect(interaction.update).toHaveBeenCalledWith(expect.objectContaining({
+          content: contentString,
         }))
       });
 
@@ -270,18 +370,21 @@ describe('DiscordTimeHandler tests', () => {
 
         await update(interaction, context)
   
-        let expectedRes = " P |    Name    |    Time     | sessionTime  | Longest Away\n"
-        expectedRes    += '------------------------------------------------------------\n'
+        let expectedRes = " P | Name                | Time        | sessionTime | Longest Away | Streak \n"
+        expectedRes    += '-----------------------------------------------------------------------------\n'
   
         expectedRes += String(1).padEnd(2) + " | "
-        expectedRes += 'Alice'.padEnd(10, " ") + "   "
-        expectedRes += '2d 13h 37m'.padEnd(11, " ") + "   "
-        expectedRes += '20h '.padEnd(11, " ") + "   "
-        expectedRes += '40m'.padEnd(11, " ")
+        expectedRes += 'Alice'.padEnd(20, " ") + "  "
+        expectedRes += '2d 13h 37m'.padEnd(12, " ") + "  "
+        expectedRes += '20h '.padEnd(12, " ") + "  "
+        expectedRes += '40m '.padEnd(13, " ") + "  "
+        expectedRes += '2'.padEnd(6, " ")
         expectedRes += '\n'
+
+        const contentString = "```" + expectedRes + "```"
     
         expect(interaction.update).toHaveBeenCalledWith(expect.objectContaining({
-          content: expectedRes,
+          content: contentString,
         }))
       });
 
@@ -299,18 +402,21 @@ describe('DiscordTimeHandler tests', () => {
 
         await update(interaction, context)
   
-        let expectedRes = " P |    Name    |    Time     | sessionTime  | Longest Away\n"
-        expectedRes    += '------------------------------------------------------------\n'
+        let expectedRes = " P | Name                | Time        | sessionTime | Longest Away | Streak \n"
+        expectedRes    += '-----------------------------------------------------------------------------\n'
   
         expectedRes += String(1).padEnd(2) + " | "
-        expectedRes += 'Alice'.padEnd(10, " ") + "   "
-        expectedRes += '1h 37m'.padEnd(11, " ") + "   "
-        expectedRes += '20h '.padEnd(11, " ") + "   "
-        expectedRes += '40m'.padEnd(11, " ")
+        expectedRes += 'Alice'.padEnd(20, " ") + "  "
+        expectedRes += '1h 37m'.padEnd(12, " ") + "  "
+        expectedRes += '20h '.padEnd(12, " ") + "  "
+        expectedRes += '40m '.padEnd(13, " ") + "  "
+        expectedRes += '2'.padEnd(6, " ")
         expectedRes += '\n'
+
+        const contentString = "```" + expectedRes + "```"
     
         expect(interaction.update).toHaveBeenCalledWith(expect.objectContaining({
-          content: expectedRes,
+          content: contentString,
         }))
       });
 
@@ -327,18 +433,21 @@ describe('DiscordTimeHandler tests', () => {
 
         await update(interaction, context)
   
-        let expectedRes = " P |    Name    |    Time     | sessionTime  | Longest Away\n"
-        expectedRes    += '------------------------------------------------------------\n'
+        let expectedRes = " P | Name                | Time        | sessionTime | Longest Away | Streak \n"
+        expectedRes    += '-----------------------------------------------------------------------------\n'
   
         expectedRes += String(1).padEnd(2) + " | "
-        expectedRes += 'Alice'.padEnd(10, " ") + "   "
-        expectedRes += '1h 40m'.padEnd(11, " ") + "   "
-        expectedRes += '20h '.padEnd(11, " ") + "   "
-        expectedRes += '40m'.padEnd(11, " ")
+        expectedRes += 'Alice'.padEnd(20, " ") + "  "
+        expectedRes += '1h 40m'.padEnd(12, " ") + "  "
+        expectedRes += '20h '.padEnd(12, " ") + "  "
+        expectedRes += '40m '.padEnd(13, " ") + "  "
+        expectedRes += '2'.padEnd(6, " ")
         expectedRes += '\n'
+
+        const contentString = "```" + expectedRes + "```"
     
         expect(interaction.update).toHaveBeenCalledWith(expect.objectContaining({
-          content: expectedRes,
+          content: contentString,
         }))
       });
 
@@ -356,18 +465,21 @@ describe('DiscordTimeHandler tests', () => {
 
         await update(interaction, context)
   
-        let expectedRes = " P |    Name    |    Time     | sessionTime  | Longest Away\n"
-        expectedRes    += '------------------------------------------------------------\n'
+        let expectedRes = " P | Name                | Time        | sessionTime | Longest Away | Streak \n"
+        expectedRes    += '-----------------------------------------------------------------------------\n'
   
         expectedRes += String(1).padEnd(2) + " | "
-        expectedRes += 'Alice'.padEnd(10, " ") + "   "
-        expectedRes += '1h 40m'.padEnd(11, " ") + "   "
-        expectedRes += '20h '.padEnd(11, " ") + "   "
-        expectedRes += '40m'.padEnd(11, " ")
+        expectedRes += 'Alice'.padEnd(20, " ") + "  "
+        expectedRes += '1h 40m'.padEnd(12, " ") + "  "
+        expectedRes += '20h '.padEnd(12, " ") + "  "
+        expectedRes += '40m '.padEnd(13, " ") + "  "
+        expectedRes += '2'.padEnd(6, " ")
         expectedRes += '\n'
+
+        const contentString = "```" + expectedRes + "```"
     
         expect(interaction.update).toHaveBeenCalledWith(expect.objectContaining({
-          content: expectedRes,
+          content: contentString,
         }))
       });
 
@@ -385,18 +497,21 @@ describe('DiscordTimeHandler tests', () => {
 
         await update(interaction, context)
   
-        let expectedRes = " P |    Name    |    Time     | sessionTime  | Longest Away\n"
-        expectedRes    += '------------------------------------------------------------\n'
+        let expectedRes = " P | Name                | Time        | sessionTime | Longest Away | Streak \n"
+        expectedRes    += '-----------------------------------------------------------------------------\n'
   
         expectedRes += String(1).padEnd(2) + " | "
-        expectedRes += 'Alice'.padEnd(10, " ") + "   "
-        expectedRes += '27m'.padEnd(11, " ") + "   "
-        expectedRes += '20h '.padEnd(11, " ") + "   "
-        expectedRes += '40m'.padEnd(11, " ")
+        expectedRes += 'Alice'.padEnd(20, " ") + "  "
+        expectedRes += '27m'.padEnd(12, " ") + "  "
+        expectedRes += '20h '.padEnd(12, " ") + "  "
+        expectedRes += '40m '.padEnd(13, " ") + "  "
+        expectedRes += '1'.padEnd(6, " ")
         expectedRes += '\n'
-    
+
+        const contentString = "```" + expectedRes + "```"
+
         expect(interaction.update).toHaveBeenCalledWith(expect.objectContaining({
-          content: expectedRes,
+          content: contentString,
         }))
       });
 

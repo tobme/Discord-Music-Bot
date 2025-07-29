@@ -1,5 +1,5 @@
-const TimeTracker = require('../../TimeHandling/TimeTracker.js')
-const {UserManager, User} = require('../../TimeHandling/UserManager.js')
+const TimeTracker = require('../../cloud/TimeHandling/TimeTracker.js')
+const {UserManager, User} = require('../../cloud/TimeHandling/UserManager.js')
 const Parse = require('parse/node')
 
 jest.mock('../../TimeHandling/UserManager.js', () => {

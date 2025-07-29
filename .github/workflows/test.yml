@@ -17,7 +17,7 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2  # Checks out the repository code
+        uses: actions/checkout@v3  # Checks out the repository code
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -38,3 +38,26 @@ jobs:
         with:
           name: test-results
           path: ./test-results  # Ensure your Jest results are stored in this folder or modify path accordingly
+  deploy-dev:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install parse cli
+        run: curl https://raw.githubusercontent.com/back4app/parse-cli/back4app/installer.sh | sudo bash
+
+      - name: Set up Back4App CLI
+        run: |
+          echo "$B4A_ACCOUNT_KEY" | b4a configure accountkey
+        env:
+          B4A_ACCOUNT_KEY: ${{ secrets.B4A_ACCOUNT_KEY_DEV }}
+          
+      - name: Deploy to Back4App
+        run: b4a deploy

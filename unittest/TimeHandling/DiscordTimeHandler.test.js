@@ -1,6 +1,6 @@
-const DiscordTimeHandler = require('../../TimeHandling/DiscordTimeHandler.js')
-const TimeTracker = require('../../TimeHandling/TimeTracker.js')
-const {UserManager, User} = require('../../TimeHandling/UserManager.js')
+const DiscordTimeHandler = require('../../cloud/TimeHandling/DiscordTimeHandler.js')
+const TimeTracker = require('../../cloud/TimeHandling/TimeTracker.js')
+const {UserManager, User} = require('../../cloud/TimeHandling/UserManager.js')
 const Parse = require('parse/node')
 
 
