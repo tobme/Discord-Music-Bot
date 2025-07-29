@@ -53,9 +53,6 @@ jobs:
         env:
           B4A_ACCOUNT_KEY: ${{ secrets.B4A_ACCOUNT_KEY }}
 
-      - name: Initialize Back4App project
-        run: b4a init --no-interactive
-
       - name: Init Back4App project config
         run: |
           mkdir -p .back4app
@@ -83,7 +80,6 @@ jobs:
 
       - name: Check auth
         run: b4a list
-
                   
       - name: Deploy to Back4App
         run: b4a deploy
