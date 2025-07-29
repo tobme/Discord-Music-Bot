@@ -77,7 +77,7 @@ jobs:
           cat .back4app/project.json
 
       - name: Check auth
-        run: b4a whoami
+        run: b4a list
 
                   
       - name: Deploy to Back4App
