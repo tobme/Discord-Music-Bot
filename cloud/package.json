@@ -5,7 +5,6 @@
   "main": "app.js",
   "author": "Your Name",
   "scripts": {
-    "start": "node server.js",
     "prepare": "husky install",
     "create-hook": "husky add .husky/pre-commit \"npm test\"",
     "test": "jest"
