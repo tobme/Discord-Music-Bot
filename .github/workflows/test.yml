@@ -76,6 +76,9 @@ jobs:
           ls -la
           cat .back4app/project.json
 
+      - name: Test project.json structure (no secrets)
+        run: jq . .back4app/project.json
+
       - name: Check auth
         run: b4a list
 
