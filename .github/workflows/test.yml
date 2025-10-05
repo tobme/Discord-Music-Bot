@@ -59,22 +59,11 @@ jobs:
       - name: Install Parse CLI
         run: curl https://raw.githubusercontent.com/back4app/parse-cli/back4app/installer.sh | sudo /bin/bash
 
-      - name: Create Parse config
+      - name: Create Parse config (Dev)
         run: |
           mkdir -p config
-          cat > config/global.json <<EOF
-          {
-            "applications": {
-              "dev": {
-                "applicationId": "${{ secrets.BACK4APP_APP_ID_DEV }}",
-                "masterKey": "${{ secrets.BACK4APP_MASTER_KEY_DEV }}",
-                "serverURL": "${{ secrets.BACK4APP_SERVER_URL }}"
-              }
-            },
-            "global": "dev"
-          }
-          EOF
-
+          echo "{\"applications\":{\"dev\":{\"applicationId\":\"${{ secrets.BACK4APP_APP_ID_DEV }}\",\"masterKey\":\"${{ secrets.BACK4APP_MASTER_KEY_DEV }}\",\"serverURL\":\"${{ secrets.BACK4APP_SERVER_URL }}\"}},\"global\":\"dev\"}" > config/global.json
+          
       - name: Deploy to Back4App Dev
         run: b4a deploy
 
