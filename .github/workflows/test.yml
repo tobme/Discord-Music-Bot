@@ -59,9 +59,7 @@ jobs:
       - name: Install Parse CLI
         run: |
           curl https://raw.githubusercontent.com/back4app/parse-cli/back4app/installer.sh | sudo /bin/bash
-          export PATH=$PATH:/usr/local/bin:$HOME/bin
-          which parse || echo "parse not found"
-          parse --version
+          b4a --version
 
       - name: Create Parse config
         run: |
@@ -78,7 +76,7 @@ jobs:
           }' > config/global.json
 
       - name: Deploy to Back4App Dev
-        run: parse deploy
+        run: b4a deploy
 
 
   deploy-prod:
