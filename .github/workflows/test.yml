@@ -57,7 +57,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Parse CLI
-        run: npm install -g parse
+        run: npm install -g @back4app/parse-cli
 
       - name: Create Parse config
         run: |
