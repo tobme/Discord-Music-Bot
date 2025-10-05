@@ -1,4 +1,4 @@
-const {execute, update} = require('../../commands/utility/listCategoryCommand.js')
+const {execute, update} = require('../../cloud/commands/utility/listCategoryCommand.js')
 
 const MockInteraction = (options = {}) => {
     return {

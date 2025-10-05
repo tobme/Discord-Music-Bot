@@ -1,38 +1,5 @@
 {
-  "name": "greeter-bot",
+  "name": "my-parse-project",
   "version": "1.0.0",
-  "description": "My First Discord Bot",
-  "main": "app.js",
-  "author": "Your Name",
-  "scripts": {
-    "start": "node server.js",
-    "prepare": "husky install",
-    "create-hook": "husky add .husky/pre-commit \"npm test\"",
-    "test": "jest"
-  },
-  "dependencies": {
-    "@discordjs/opus": "^0.10.0",
-    "@discordjs/voice": "^0.10.0",
-    "async-mutex": "^0.4.0",
-    "discord": "^0.8.2",
-    "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
-    "discord.js": "14.14.1",
-    "ffmpeg": "^0.0.4",
-    "ffmpeg-static": "^5.2.0",
-    "glob": "^9.3.5",
-    "husky": "6.0.0",
-    "jest": "^29.7.0",
-    "js": "^0.1.0",
-    "node": "18.4.0",
-    "node-gyp": "^8.4.1",
-    "node-pre-gyp": "^0.17.0",
-    "node.js": "0.0.1-security",
-    "npm": "^8.x",
-    "parse": "^5.0.0",
-    "rebuild": "^0.1.2",
-    "tweetnacl": "^1.0.3",
-    "typescript": "^4.5.4"
-  },
-  "keywords": [],
-  "license": "ISC"
+  "main": "cloud/app.js"
 }

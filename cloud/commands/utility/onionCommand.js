@@ -107,146 +107,40 @@ function getMenuBuilders(year, month, day)
     return [row, row2, row3];
 }
 
-async function getLongestAway(user)
+async function getUserTimesScoreboard(timeCalculator, year, month, day)
 {
-    console.log("Is in discord: " + Boolean(user.InDiscord))
-    
-    // If user is in discord then the updated longest away is always largest
-    if (Boolean(user.InDiscord))
-    {
-        return user.longestAway
-    }
-    
-    let leftTime = user.leftTime
-    
-    // Never have left disc
-    if (leftTime === "-1")
-    {
-        return user["longestAway"]
-    }
-    
-    leftTime = new Date(leftTime)
-    
-    let currentTime = new Date()
-    
-    let timeSinceLeft = currentTime - leftTime
-    
-    timeSinceLeft /= 1000 * 60 // min
-        
-    timeSinceLeft = Math.round(timeSinceLeft)
-    
-    if (timeSinceLeft > Number(user.longestAway))
-    {
-        return timeSinceLeft
-    }
-    else
-    {
-        return user.longestAway
-    }
-}
-
-function getUserObject(object, selectionString)
-{
-    if (selectionString == 'All')
-        return object
-
-    let retObject = new Object()
-
-    for (const [key, val] of Object.entries(object))
-    {
-        if (selectionString.includes(key))
-            retObject[key] = val
-    }
-
-    return retObject
-}
-
-function splitDay(daySelection)
-{
-    const tmpSplit = daySelection.split('-')
-    let tmp = []
-    for (let i = Number(tmpSplit[0]); i <= Number(tmpSplit[1]); i++)
-    {
-        let string = ''
-        if (i < 10)
-            string += '0'
-        string += String(i)
-        tmp.push(string)
-    }
-    return tmp
-}
-
-function getUserTime(user, yearSelection, monthSelection, daySelection)
-{
-    let time = 0
-
-    if (yearSelection == 'All' && monthSelection == 'All' && daySelection == 'All')
-        time += user.time
-
-    if (daySelection != 'All')
-    {
-        daySelection = splitDay(daySelection)
-    }
-
-    const monthToInt = {'All': 'All', 'Januari': '01', 'Februari': '02', 'Mars': '03', 'April': '04', 'Maj': '05', 'Juni': '06', 'Juli': '07', 'Augusti': '08', 'September': '09', 'Oktober': '10', 'November': '11', 'December': '12'};
-
-    monthSelection = monthToInt[monthSelection]
-
-    const selectedYears = getUserObject(user.timeObject, [yearSelection])
-
-    for (const [key, years] of Object.entries(selectedYears))
-    {
-        const selectedMonths = getUserObject(years, [monthSelection])
-
-        for (const [key2, month] of Object.entries(selectedMonths))
-        {
-            const selectedDays = getUserObject(month, daySelection)
-
-            for (const [key2, day] of Object.entries(selectedDays))
-            {
-                time += Number(day)
-            }
-        }
-    }
-
-    return time
-}
-
-async function getUserTimesScoreboard(personsInDiscord, year, month, day)
-{
-    var out = new Array()
-                  
-    for (const person in personsInDiscord)
-    {
-        let time = getUserTime(personsInDiscord[person], year, month, day)
-        out.push( {"name": personsInDiscord[person].userName, "InDiscord": personsInDiscord[person].InDiscord, "time": time, "sessionTime": personsInDiscord[person].sessionTime, "leftTime": personsInDiscord[person].leftTime, "longestAway": personsInDiscord[person].longestAway} )
-    }
+    var out = timeCalculator.getTimeData(year, month, day)
     
     out.sort(function(a, b){return Number(b.time) - Number(a.time) });
     
-    var string = " P |    Name    |    Time     | sessionTime  | Longest Away\n"
-    string    += '------------------------------------------------------------\n'
+    var string = " P | Name                | Time        | sessionTime | Longest Away | Streak \n"
+    string    += '-----------------------------------------------------------------------------\n'
     
     for (let i = 0; i < out.length; i++)
     {
       string += String(i+1).padEnd(2) + " | "
       
-      let tmpName = out[i].name.padEnd(10, " ")
-      string += tmpName + "   "
+      let tmpName = out[i].name.padEnd(20, " ")
+      string += tmpName + "  "
       
-      let tmpTime = convertToTime(out[i].time).padEnd(11, " ")
-      string += tmpTime + "   "
+      let tmpTime = convertToTime(out[i].time).padEnd(12, " ")
+      string += tmpTime + "  "
       
-      let tmpSessionTime = convertToTime(out[i].sessionTime) .padEnd(11, " ")
-      string += tmpSessionTime + "   "
+      let tmpSessionTime = convertToTime(out[i].sessionTime) .padEnd(12, " ")
+      string += tmpSessionTime + "  "
       
-      let tmpLongestAwayStr = await getLongestAway(out[i])
+      let tmpLongestAwayStr = out[i].longestAway
       tmpLongestAwayStr = Number(tmpLongestAwayStr)
-      let tmpLongestAway = tmpLongestAwayStr !== 0 ? convertToTime(tmpLongestAwayStr).padEnd(11, " ") : String("No Data").padEnd(11, " ")
-      string += tmpLongestAway + '\n'
+      let tmpLongestAway = tmpLongestAwayStr !== 0 ? convertToTime(tmpLongestAwayStr).padEnd(13, " ") : String("No Data").padEnd(13, " ")
+      string += tmpLongestAway + "  "
+
+      let tmpStreak = out[i].streak.padEnd(6, " ")
+      string += tmpStreak + "\n"
     }
 
-    return string
+    const discordMessage = "```" + string + "```"
+
+    return discordMessage
 }
 
 module.exports = {
@@ -257,11 +151,9 @@ module.exports = {
 
     async execute(interaction, context) 
     {
-        var {timeHandler} = context;
-
-        var personsInDiscord = timeHandler.getDiscordTimes()
+        var {timeCalculator} = context;
     
-        var string = await getUserTimesScoreboard(personsInDiscord, 'All', 'All', 'All')
+        var string = await getUserTimesScoreboard(timeCalculator, 'All', 'All', 'All')
 
         var menuBuilders = getMenuBuilders('All', 'All', 'All')
 
@@ -282,9 +174,7 @@ module.exports = {
             });
         }
 
-        var {timeHandler} = context;
-
-        var personsInDiscord = timeHandler.getDiscordTimes()
+        var {timeCalculator} = context;
 
         const yearData = interaction.message.components[0]['components'][0]['data']
         const monthData = interaction.message.components[1]['components'][0]['data']
@@ -303,7 +193,7 @@ module.exports = {
 
         const menuBuilders = getMenuBuilders(year, month, day)
 
-        var contentString = await getUserTimesScoreboard(personsInDiscord, year, month, day)
+        var contentString = await getUserTimesScoreboard(timeCalculator, year, month, day)
 
         await interaction.update({"content": contentString, components: menuBuilders, ephemeral: false})
     }

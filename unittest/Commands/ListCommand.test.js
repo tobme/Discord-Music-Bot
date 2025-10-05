@@ -1,4 +1,4 @@
-const {execute} = require('../../commands/utility/listCommand.js')
+const {execute} = require('../../cloud/commands/utility/listCommand.js')
 
 
 describe('DiscordTimeHandler tests', () => {

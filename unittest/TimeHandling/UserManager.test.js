@@ -1,4 +1,4 @@
-const {UserManager, User} = require('../../TimeHandling/UserManager.js')
+const {UserManager, User} = require('../../cloud/TimeHandling/UserManager.js')
 
 
 test("getUser_noUser_ReturnsNull", () => {

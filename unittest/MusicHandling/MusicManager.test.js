@@ -1,5 +1,5 @@
-const MusicManager = require('../../MusicHandling/MusicManager.js')
-const MusicInfo = require('../../MusicHandling/MusicInfo.js')
+const MusicManager = require('../../cloud/MusicHandling/MusicManager.js')
+const MusicInfo = require('../../cloud/MusicHandling/MusicInfo.js')
 const Parse = require('parse/node')
 
 

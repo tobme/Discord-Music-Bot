@@ -1,0 +1,11 @@
+.git/
+.github/
+.husky/
+.vscode/
+node_modules/
+unittest/
+.gitignore
+.npmrc
+botGif.gif
+README.md
+Update Remember.txt

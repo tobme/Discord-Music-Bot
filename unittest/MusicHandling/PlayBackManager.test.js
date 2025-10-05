@@ -1,11 +1,11 @@
-const PlaybackManager = require('../../MusicHandling/PlayBackManager.js')
-const MusicInfo = require('../../MusicHandling/MusicInfo.js')
-const MusicManager = require('../../MusicHandling/MusicManager.js')
-const QueueManager = require('../../MusicHandling/QueueManager.js')
-const ShuffleManager = require('../../MusicHandling/ShuffleManager.js')
+const PlaybackManager = require('../../cloud/MusicHandling/PlayBackManager.js')
+const MusicInfo = require('../../cloud/MusicHandling/MusicInfo.js')
+const MusicManager = require('../../cloud/MusicHandling/MusicManager.js')
+const QueueManager = require('../../cloud/MusicHandling/QueueManager.js')
+const ShuffleManager = require('../../cloud/MusicHandling/ShuffleManager.js')
 const Parse = require('parse/node')
 
-jest.mock('../../MusicHandling/MusicManager', () => {
+jest.mock('../../cloud/MusicHandling/MusicManager', () => {
     return jest.fn().mockImplementation(() => ({
         musicList: [
             { name: "Song 1", fileUrl: "url1.mp3", queueable: true, objectId: "1", amountPlayed: 0, creatorName: "Artist 1" },
@@ -20,13 +20,13 @@ jest.mock('../../MusicHandling/MusicManager', () => {
     }))
 })
 
-jest.mock('../../MusicHandling/QueueManager', () => {
+jest.mock('../../cloud/MusicHandling/QueueManager', () => {
     return jest.fn().mockImplementation(() => ({
         getNextSong: jest.fn().mockResolvedValue('QueuedFileUrl'), // Mock async function
     }));
 });
 
-jest.mock('../../MusicHandling/ShuffleManager', () => {
+jest.mock('../../cloud/MusicHandling/ShuffleManager', () => {
     return jest.fn().mockImplementation(() => ({
         getShuffledSong: jest.fn().mockResolvedValue('ShuffledFileUrl'),  // Mock async function
     }))

@@ -4,12 +4,12 @@ const {createDiscordTimeHandler} = require('./TimeHandling/DiscordTimeHandlerFac
 const TimeHandler = require('./TimeHandling/DiscordTimeHandler.js')
 const {createPlayBackManager} = require('./MusicHandling/PlayBackManagerFactory.js')
 const ChannelManager = require('./ChannelManager.js')
-const auth = require("./auth.js")
+const TimeCalculator = require('./TimeHandling/DiscordTimeCalculator.js')
 
 const fs = require('fs');
 const path = require('node:path')
 
-Parser.initialize(auth.parseAppId, auth.parseJsId);
+Parser.initialize(process.env.PARSE_APP_ID, process.env.PARSE_JS_ID);
 Parser.serverURL = 'https://parseapi.back4app.com/'
 
 console.log("Starting")
@@ -17,26 +17,24 @@ console.log("Starting")
 const { Client, GatewayIntentBits, Events, Collection, REST, Routes } = require('discord.js')
 const bot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildPresences] });
 
-var token = auth.token
-var botAppId = auth.botAppId
-var serverID = auth.serverId
+var token = process.env.TOKEN
+var botAppId = process.env.BOT_APP_ID
+var serverID = process.env.SERVER_ID
 
 bot.login(token);
 
 const timeHandler = createDiscordTimeHandler(Parser)
 const playBackManger = createPlayBackManager(Parser)
 const channelManager = new ChannelManager(playBackManger)
+const timeCalculator = new TimeCalculator(timeHandler)
 
 const context = {
 	playBackManger,
-	timeHandler
+	timeHandler,
+	timeCalculator
 }
 
 console.log("Version: " + process.version);
-
-
-
-
 
 const commands = [];
 bot.commands = new Collection();
@@ -145,7 +143,7 @@ process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
-/*
+
 Parse.Cloud.afterSave("Sounds", (request) => 
 {
 	let file = request.object.get('File')
@@ -172,7 +170,7 @@ Parse.Cloud.afterSave("Sounds", (request) =>
 Parse.Cloud.job("noIdle", async (request) => {
   console.log("Keep idle")
 });
-*/
+
 
 bot.on("presenceUpdate", (oldMember, newMember) => {
 
