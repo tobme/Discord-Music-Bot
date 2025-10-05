@@ -2,12 +2,12 @@ const TimeTracker = require('../../cloud/TimeHandling/TimeTracker.js')
 const {UserManager, User} = require('../../cloud/TimeHandling/UserManager.js')
 const Parse = require('parse/node')
 
-jest.mock('../../TimeHandling/UserManager.js', () => {
+jest.mock('../../cloud/TimeHandling/UserManager.js', () => {
     return {
         UserManager: jest.fn(() => ({
             getUser: jest.fn()
         })),
-        User: jest.requireActual('../../TimeHandling/UserManager.js').User // Ensures `User` is not mocked
+        User: jest.requireActual('../../cloud/TimeHandling/UserManager.js').User // Ensures `User` is not mocked
     };
 });
 jest.mock('parse/node', function () {

@@ -4,7 +4,7 @@ const {UserManager, User} = require('../../cloud/TimeHandling/UserManager.js')
 const Parse = require('parse/node')
 
 
-jest.mock('../../TimeHandling/UserManager.js', function () {
+jest.mock('../../cloud/TimeHandling/UserManager.js', function () {
   return {
       UserManager: jest.fn().mockImplementation(function () {
               this.getUser = jest.fn()
@@ -12,11 +12,11 @@ jest.mock('../../TimeHandling/UserManager.js', function () {
               this.addUser = jest.fn()
               this.updateUser = jest.fn()
       }),
-      User: jest.requireActual('../../TimeHandling/UserManager.js').User
+      User: jest.requireActual('../../cloud/TimeHandling/UserManager.js').User
   };
 });
 
-jest.mock('../../TimeHandling/TimeTracker.js', function () {
+jest.mock('../../cloud/TimeHandling/TimeTracker.js', function () {
   return jest.fn().mockImplementation(function () {
       this.updateLongestAway = jest.fn()
       this.updateTime = jest.fn()

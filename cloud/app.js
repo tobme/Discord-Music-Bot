@@ -4,6 +4,7 @@ const {createDiscordTimeHandler} = require('./TimeHandling/DiscordTimeHandlerFac
 const TimeHandler = require('./TimeHandling/DiscordTimeHandler.js')
 const {createPlayBackManager} = require('./MusicHandling/PlayBackManagerFactory.js')
 const ChannelManager = require('./ChannelManager.js')
+const TimeCalculator = require('./TimeHandling/DiscordTimeCalculator.js')
 
 const fs = require('fs');
 const path = require('node:path')
@@ -25,17 +26,15 @@ bot.login(token);
 const timeHandler = createDiscordTimeHandler(Parser)
 const playBackManger = createPlayBackManager(Parser)
 const channelManager = new ChannelManager(playBackManger)
+const timeCalculator = new TimeCalculator(timeHandler)
 
 const context = {
 	playBackManger,
-	timeHandler
+	timeHandler,
+	timeCalculator
 }
 
 console.log("Version: " + process.version);
-
-
-
-
 
 const commands = [];
 bot.commands = new Collection();

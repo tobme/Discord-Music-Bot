@@ -3,7 +3,7 @@ const MusicInfo = require('../../cloud/MusicHandling/MusicInfo.js')
 const MusicManager = require('../../cloud/MusicHandling/MusicManager.js')
 const Parse = require('parse/node')
 
-jest.mock('../../MusicHandling/MusicManager', () => {
+jest.mock('../../cloud/MusicHandling/MusicManager', () => {
     return jest.fn().mockImplementation(() => ({
         musicList: [
             { name: "Song 1", fileUrl: "url1.mp3", queueable: true, objectId: "1", creatorName: "Artist 1" },

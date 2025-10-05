@@ -1,6 +1,20 @@
 name: Run Jest Tests
 
-on: [push, pull_request]  # Trigger on push or pull request events
+on:
+  push:
+    branches:
+      - main
+      - master
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
 
 jobs:
   test:
@@ -32,54 +46,62 @@ jobs:
         with:
           name: test-results
           path: ./test-results  # Ensure your Jest results are stored in this folder or modify path accordingly
+
   deploy-dev:
+    if: github.event_name == 'push'
+    name: Deploy to Back4App Dev
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
+      - name: Install Parse CLI
+        run: npm install -g parse
 
-      - name: Install parse cli
-        run: curl https://raw.githubusercontent.com/back4app/parse-cli/back4app/installer.sh | sudo bash
-
-      - name: Set up Back4App CLI
+      - name: Create Parse config
         run: |
-          echo "$B4A_ACCOUNT_KEY" | b4a configure accountkey
-        env:
-          B4A_ACCOUNT_KEY: ${{ secrets.B4A_ACCOUNT_KEY }}
-
-      - name: Init Back4App project config
-        run: |
-          mkdir -p .back4app
+          mkdir -p config
           echo '{
-            "appId": "${{ secrets.B4A_APP_ID_DEV }}",
-            "appName": "MyApp",
-            "language": "JavaScript",
-            "version": "1.0.0"
-          }' > .back4app/project.json
+            "applications": {
+              "dev": {
+                "applicationId": "${{ secrets.BACK4APP_APP_ID_DEV }}",
+                "masterKey": "${{ secrets.BACK4APP_MASTER_KEY_DEV }}",
+                "serverURL": "${{ secrets.BACK4APP_SERVER_URL }}"
+              }
+            },
+            "global": "dev"
+          }' > config/global.json
 
-      - name: Verify required files exist
+      - name: Deploy to Back4App Dev
+        run: parse deploy
+
+
+  deploy-prod:
+    if: github.event_name == 'workflow_dispatch'
+    name: Deploy to Back4App Prod
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Parse CLI
+        run: npm install -g parse
+
+      - name: Create Parse config
         run: |
-          ls -la
-          test -f .back4app/project.json || (echo "Missing project.json" && exit 1)
-          test -d cloud || (echo "Missing cloud/ folder" && exit 1)
+          mkdir -p config
+          echo '{
+            "applications": {
+              "prod": {
+                "applicationId": "${{ secrets.BACK4APP_APP_ID_PROD }}",
+                "masterKey": "${{ secrets.BACK4APP_MASTER_KEY_PROD }}",
+                "serverURL": "${{ secrets.BACK4APP_SERVER_URL }}"
+              }
+            },
+            "global": "prod"
+          }' > config/global.json
 
-      - name: Debug
-        run: |
-          pwd
-          ls -la
-          cat .back4app/project.json
-
-      - name: Test project.json structure (no secrets)
-        run: jq . .back4app/project.json
-
-      - name: Check auth
-        run: b4a list
-                  
-      - name: Deploy to Back4App
-        run: b4a deploy
+      - name: Deploy to Back4App Prod
+        run: parse deploy
