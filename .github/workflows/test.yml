@@ -60,7 +60,7 @@ jobs:
         run: curl https://raw.githubusercontent.com/back4app/parse-cli/back4app/installer.sh | sudo /bin/bash
 
       - name: Configure Back4App CLI
-        run: b4a configure accountkey --key "${{ secrets.BACK4APP_ACCOUNT_KEY }}"
+        run: echo "${{ secrets.BACK4APP_ACCOUNT_KEY }}" | b4a configure accountkey
 
       - name: Create Parse config (Dev)
         run: |
