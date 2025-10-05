@@ -59,7 +59,8 @@ jobs:
       - name: Install Parse CLI
         run: |
           curl https://raw.githubusercontent.com/back4app/parse-cli/back4app/installer.sh | sudo /bin/bash
-          source ~/.bashrc || true
+          export PATH=$PATH:/usr/local/bin:$HOME/bin
+          which parse || echo "parse not found"
           parse --version
 
       - name: Create Parse config
