@@ -64,6 +64,9 @@ jobs:
           mkdir -p config
           echo '{"applications":{"dev":{"applicationId":"'"${{ secrets.BACK4APP_APP_ID_DEV }}"'","masterKey":"'"${{ secrets.BACK4APP_MASTER_KEY_DEV }}"'","serverURL":"'"${{ secrets.BACK4APP_SERVER_URL }}"'"}},"global":"dev"}' > config/global.json
 
+      - name: Print Parse config nicely
+        run: cat config/global.json | jq .
+
       - name: Deploy to Back4App Dev
         run: b4a deploy
 
