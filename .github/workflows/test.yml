@@ -62,7 +62,8 @@ jobs:
       - name: Create Parse config
         run: |
           mkdir -p config
-          echo '{
+          cat > config/global.json <<EOF
+          {
             "applications": {
               "dev": {
                 "applicationId": "${{ secrets.BACK4APP_APP_ID_DEV }}",
@@ -71,7 +72,8 @@ jobs:
               }
             },
             "global": "dev"
-          }' > config/global.json
+          }
+          EOF
 
       - name: Deploy to Back4App Dev
         run: b4a deploy
