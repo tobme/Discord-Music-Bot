@@ -4,14 +4,12 @@ FROM node:22
 # Set working directory
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json first for caching
-COPY package*.json ./
+# Copy only your cloud folder contents
+COPY cloud/package*.json ./
 
-# Install dependencies
 RUN npm install
 
-# Copy your app source code
-COPY . .
+COPY cloud/. ./
 
 # Expose a port if needed (for example, if your bot has a web dashboard)
 ENV PORT=3000
