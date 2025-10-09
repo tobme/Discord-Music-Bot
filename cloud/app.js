@@ -1,5 +1,5 @@
 //var { engines } = import('./package');
-const Parser = require("parse/node.js");
+const Parse = require("parse/node.js");
 const {createDiscordTimeHandler} = require('./TimeHandling/DiscordTimeHandlerFactory.js')
 const TimeHandler = require('./TimeHandling/DiscordTimeHandler.js')
 const {createPlayBackManager} = require('./MusicHandling/PlayBackManagerFactory.js')
@@ -9,8 +9,8 @@ const TimeCalculator = require('./TimeHandling/DiscordTimeCalculator.js')
 const fs = require('fs');
 const path = require('node:path')
 
-Parser.initialize(process.env.PARSE_APP_ID, process.env.PARSE_JS_ID);
-Parser.serverURL = 'https://parseapi.back4app.com/'
+Parse.initialize(process.env.PARSE_APP_ID, process.env.PARSE_JS_ID);
+Parse.serverURL = 'https://parseapi.back4app.com/'
 
 console.log("Starting")
 
@@ -23,8 +23,8 @@ var serverID = process.env.SERVER_ID
 
 bot.login(token);
 
-const timeHandler = createDiscordTimeHandler(Parser)
-const playBackManger = createPlayBackManager(Parser)
+const timeHandler = createDiscordTimeHandler(Parse)
+const playBackManger = createPlayBackManager(Parse)
 const channelManager = new ChannelManager(playBackManger)
 const timeCalculator = new TimeCalculator(timeHandler)
 
