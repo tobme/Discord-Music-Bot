@@ -347,7 +347,7 @@ class DiscordTimeCalculator {
             let time = this.getUserTime(personsInDiscord[person], year, month, day)
             let streak = this.getUserStreak(personsInDiscord[person], year, month, day)
             let longestAway = await this.getLongestAway(personsInDiscord[person], year, month, day)
-            let sessionTime = this.getSessionTime(user, year, month, day)
+            let sessionTime = this.getSessionTime(personsInDiscord[person], year, month, day)
             out.push( {"name": personsInDiscord[person].userName, "InDiscord": personsInDiscord[person].InDiscord, "time": time, "sessionTime": sessionTime, "leftTime": personsInDiscord[person].leftTime, "longestAway": longestAway, "streak": streak} )
         }
 
