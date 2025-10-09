@@ -306,7 +306,7 @@ class DiscordTimeCalculator {
 
         if (daySelection != 'All')
         {
-            daySelection = splitDay(daySelection)
+            daySelection = this.#splitDay(daySelection)
         }
 
         const monthToInt = {'All': 'All', 'Januari': '01', 'Februari': '02', 'Mars': '03', 'April': '04', 'Maj': '05', 'Juni': '06', 'Juli': '07', 'Augusti': '08', 'September': '09', 'Oktober': '10', 'November': '11', 'December': '12'};
