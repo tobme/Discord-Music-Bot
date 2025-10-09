@@ -14,6 +14,7 @@ RUN npm install
 COPY . .
 
 # Expose a port if needed (for example, if your bot has a web dashboard)
+ENV PORT=3000
 EXPOSE 3000
 
 # Start the bot

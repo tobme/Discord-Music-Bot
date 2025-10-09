@@ -5,6 +5,17 @@ const TimeHandler = require('./TimeHandling/DiscordTimeHandler.js')
 const {createPlayBackManager} = require('./MusicHandling/PlayBackManagerFactory.js')
 const ChannelManager = require('./ChannelManager.js')
 const TimeCalculator = require('./TimeHandling/DiscordTimeCalculator.js')
+const express = require('express');3
+
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get('/', (req, res) => res.send('Bot is running!'));
+
+app.listen(PORT, () => {
+  console.log(`HTTP server running on port ${PORT}`);
+});
 
 const fs = require('fs');
 const path = require('node:path')
