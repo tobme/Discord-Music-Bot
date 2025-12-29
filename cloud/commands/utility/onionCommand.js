@@ -109,7 +109,7 @@ function getMenuBuilders(year, month, day)
 
 async function getUserTimesScoreboard(timeCalculator, year, month, day)
 {
-    var out = timeCalculator.getTimeData(year, month, day)
+    var out = await timeCalculator.getTimeData(year, month, day)
     
     out.sort(function(a, b){return Number(b.time) - Number(a.time) });
     

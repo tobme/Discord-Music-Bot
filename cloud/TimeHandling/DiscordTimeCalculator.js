@@ -306,7 +306,7 @@ class DiscordTimeCalculator {
 
         if (daySelection != 'All')
         {
-            daySelection = splitDay(daySelection)
+            daySelection = this.#splitDay(daySelection)
         }
 
         const monthToInt = {'All': 'All', 'Januari': '01', 'Februari': '02', 'Mars': '03', 'April': '04', 'Maj': '05', 'Juni': '06', 'Juli': '07', 'Augusti': '08', 'September': '09', 'Oktober': '10', 'November': '11', 'December': '12'};
@@ -344,10 +344,10 @@ class DiscordTimeCalculator {
 
         for (const person in personsInDiscord)
         {
-            let time = getUserTime(personsInDiscord[person], year, month, day)
-            let streak = getUserStreak(personsInDiscord[person], year, month, day)
-            let longestAway = await getLongestAway(personsInDiscord[person], year, month, day)
-            let sessionTime = getSessionTime(user, year, month, day)
+            let time = this.getUserTime(personsInDiscord[person], year, month, day)
+            let streak = this.getUserStreak(personsInDiscord[person], year, month, day)
+            let longestAway = await this.getLongestAway(personsInDiscord[person], year, month, day)
+            let sessionTime = this.getSessionTime(personsInDiscord[person], year, month, day)
             out.push( {"name": personsInDiscord[person].userName, "InDiscord": personsInDiscord[person].InDiscord, "time": time, "sessionTime": sessionTime, "leftTime": personsInDiscord[person].leftTime, "longestAway": longestAway, "streak": streak} )
         }
 

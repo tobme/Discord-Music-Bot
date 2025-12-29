@@ -17,12 +17,13 @@
   "dependencies": {
     "@discordjs/opus": "^0.10.0",
     "@discordjs/voice": "^0.19.0",
-    "@mapbox/node-pre-gyp": "^2.0.0",
+    "@snazzah/davey": "^0.1.9",
     "async-mutex": "^0.4.0",
+    "axios": "^1.13.2",
     "discord.js": "^14.22.1",
     "ffmpeg-static": "^5.2.0",
     "glob": "^9.3.5",
-    "node-gyp": "^8.4.1",
+    "libsodium-wrappers": "^0.7.15",
     "parse": "^6.1.1",
     "tweetnacl": "^1.0.3",
     "typescript": "^5.9.3"

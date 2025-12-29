@@ -1,10 +1,18 @@
 const {joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, VoiceConnectionStatus, StreamType, entersState} = require("@discordjs/voice")
+const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
+const { pipeline } = require('node:stream/promises');
 
 class ChannelManager
 {
     constructor(playBackManger)
     {
-        this.player = createAudioPlayer();
+        this.player = createAudioPlayer({
+                behaviors: {
+                    noSubscriber: 'play' 
+                }
+            });
         this.playing = false
         this.playBackManger = playBackManger
         this.playing = false
@@ -20,23 +28,45 @@ class ChannelManager
         });
     }
 
-    playFile(channel)
+    async playFile(channel)
     {
         if (this.playing) return;
-        
-        const fileURL = this.playBackManger.getNextSong()
 
-        const resource = createAudioResource(fileURL, { inlineVolume: true });
-        this.player.play(resource);
+        this.connection = await this.connectToChannel(channel)
 
+        try {
+            const fileURL = this.playBackManger.getNextSong()
 
-        entersState(this.player, AudioPlayerStatus.Playing, 5e3);
+            await entersState(this.connection, VoiceConnectionStatus.Ready, 20_000);
 
-        this.connection = this.connectToChannel(channel)
-        this.connection.subscribe(this.player)
+            const cacheDir = path.join(__dirname, 'cache');
+            if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir);
+            const safeFileName = new URL(fileURL).pathname.replace(/[:\\/]/g, "_");
+            const localPath = path.join(cacheDir, safeFileName);
+
+            if (!fs.existsSync(localPath)) 
+            {
+                // Download once if it doesn't exist
+                const response = await axios.get(fileURL, { responseType: 'stream' });
+                await pipeline(response.data, fs.createWriteStream(localPath));
+            }
+
+            this.connection.subscribe(this.player)
+
+            const resource = createAudioResource(localPath, { inlineVolume: false });
+            this.player.play(resource);
+
+            await entersState(this.player, AudioPlayerStatus.Playing, 5e3);
+        }
+        catch (error) 
+        {
+            console.error("Failed to connect or play:", error);
+            this.connection?.destroy();
+        }
+
     }
 
-    connectToChannel(channel) {
+    async connectToChannel(channel) {
         const connection = joinVoiceChannel({
             channelId: channel.channelId,
             guildId: channel.guild.id,

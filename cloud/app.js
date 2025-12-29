@@ -143,7 +143,7 @@ process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
-
+/*
 Parse.Cloud.afterSave("Sounds", (request) => 
 {
 	let file = request.object.get('File')
@@ -170,7 +170,7 @@ Parse.Cloud.afterSave("Sounds", (request) =>
 Parse.Cloud.job("noIdle", async (request) => {
   console.log("Keep idle")
 });
-
+*/
 
 bot.on("presenceUpdate", (oldMember, newMember) => {
 
