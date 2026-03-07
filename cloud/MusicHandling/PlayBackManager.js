@@ -51,6 +51,13 @@ class PlaybackManager {
             .catch(error => console.log('Failed to update object: ' + error.message))
     }
 
+    async reload(Parse)
+    {
+        this.musicManager.musicList = [];
+        await this.musicManager.retrieveSounds(Parse);
+        console.log("Music list reloaded");
+    }
+
     getMusicList()
     {
         return this.musicManager.musicList;

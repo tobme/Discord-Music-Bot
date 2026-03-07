@@ -125,13 +125,13 @@ describe('DiscordTimeCalculator tests', () => {
       });
 
       test.each([
-        ['All', 'Januari', 'All', 3],
-        ['All', 'Januari', '1-7', 3],
-        ['2024', 'Januari', '1-7', 2],
-        ['All', 'All', '1-7', 3],
-        ['All', 'Februari', 'All', 1],
+        ['All', 'Januari', 'All', 4320],
+        ['All', 'Januari', '1-7', 4320],
+        ['2024', 'Januari', '1-7', 2880],
+        ['All', 'All', '1-7', 4320],
+        ['All', 'Februari', 'All', 1440],
         ['All', 'June', 'All', 0],
-        ['2025', 'All', 'All', 5],
+        ['2025', 'All', 'All', 7200],
       ])('getLongestAway_TimeSelection_expect', async (yearSelection, monthSelection, daySelection, result) => {
 
         discordTimeCalculator = new DiscordTimeCalculator(DiscordTimeHandler)
@@ -154,11 +154,36 @@ describe('DiscordTimeCalculator tests', () => {
         expect(longestAway).toBe(result)
       });
 
+      test('getLongestAway_UserOnlyActiveMidMonth_expectGapFromMonthStart', async () => {
+
+        discordTimeCalculator = new DiscordTimeCalculator(DiscordTimeHandler)
+
+        const date = new Date('2025-01-10T10:00:00.000Z');
+        const RealDate = Date;
+
+        jest.spyOn(global, 'Date').mockImplementation((...args) => {
+          if (args.length === 0) return date;
+          return new RealDate(...args);
+        });
+        global.Date.UTC = RealDate.UTC;
+        global.Date.now = RealDate.now;
+        global.Date.parse = RealDate.parse;
+
+        // User first appears May 15 → gap should start from May 1 (period start) = 14 days = 20160 min
+        let longestAway = await discordTimeCalculator.getLongestAway(
+          { userName: 'Alice', inDiscord: false, time: 0, sessionTime: 0, leftTime: new Date('2025-02-11T10:00:00.000Z'), longestAway: 0, timeObject: {'2024': {'05': {'15': 30}}} },
+          'All', 'Maj', 'All'
+        )
+
+        expect(longestAway).toBe(20160)
+      });
+
       test.each([
         [{'2024': {'02': {'27': 30, '28': 0}}}, "2"],
         [{'2024': {'02': {'27': 30, '28': 0, '29': 0}, '03': {'01': 0, '02': 0, '03': 0, '04': 0}}}, "7"],
         [{'2024': {'02': {'27': 30, '28': 0}, '06': {'30': 0}, '07': {'05': 0, '07': 0, '08': 0, '09': 0}}}, "3"],
         [{'2024': {'12': {'30': 30, '31': 0}}, '2025': {'01' : {'01': 0, '02': 0, '03': 0}}}, "5"],
+        [{'2025': {'01': {'09': 0, '10': 0, '11': 0}}}, "3"],
       ])('getUserStreak_timeObject6dayStreak_expectDayStreak', async (timeobj, result) => {
 
         discordTimeCalculator = new DiscordTimeCalculator(DiscordTimeHandler)

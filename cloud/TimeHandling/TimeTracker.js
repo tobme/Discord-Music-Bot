@@ -17,6 +17,8 @@ class TimeTracker {
         if (timeSinceLeft > Number(user.longestAway)) {
             user.longestAway = timeSinceLeft;
             this.saveUserTime(userID, { longestAway: user.longestAway, leftTime: user.leftTime });
+        } else {
+            this.saveUserTime(userID, { leftTime: user.leftTime });
         }
     }
 

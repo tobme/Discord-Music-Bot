@@ -135,6 +135,9 @@ bot.on(Events.InteractionCreate, async interaction => {
 
 });
 
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+setInterval(() => playBackManger.reload(Parse), ONE_DAY_MS);
+
 process.on('uncaughtException', (error) => {
     console.error('Uncaught Exception:', error);
 });

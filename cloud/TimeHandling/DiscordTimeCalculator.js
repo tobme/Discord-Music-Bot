@@ -106,23 +106,31 @@ class DiscordTimeCalculator {
         if (dates.length < 2) return -1;
         let maxGap = 0;
         for (let i = 1; i < dates.length; i++) {
-            const gap = (dates[i] - dates[i - 1]) / (1000 * 60 * 60 * 24);
+            const gap = (dates[i] - dates[i - 1]) / (1000 * 60);
             if (gap > maxGap) maxGap = gap;
         }
         return maxGap;
     }
 
-    #getMaxGap(user, yearFilter = [], monthFilter = [], weekFilter = []) 
+    #getMaxGap(user, yearFilter = 'All', monthFilter = 'All', weekFilter = 'All')
     {
         const { mode, dates } = this.#extractFilteredDates(user, yearFilter, monthFilter, weekFilter);
 
         if (mode === 'global') {
-            return this.#findLongestGap(dates);
+            const periodStart = new Date(Date.UTC(parseInt(yearFilter), 0, 1));
+            return this.#findLongestGap([periodStart, ...dates]);
         }
+
+        const startDay = weekFilter === 'All' ? 1 : parseInt(weekFilter.split('-')[0]);
 
         let maxGap = 0;
         for (const key in dates) {
-            const gap = this.#findLongestGap(dates[key]);
+            const parts = key.split('-');
+            const y = parseInt(parts[0]);
+            const m = parseInt(parts[1]) - 1;
+            const periodStart = new Date(Date.UTC(y, m, startDay));
+
+            const gap = this.#findLongestGap([periodStart, ...dates[key]]);
             if (gap > maxGap) maxGap = gap;
         }
         return maxGap;
@@ -267,7 +275,7 @@ class DiscordTimeCalculator {
             {
                 const selectedDays = this.getUserObject(month, daySelection)
 
-                for (const [currentDay, day] of Object.entries(selectedDays))
+                for (const [currentDay, day] of Object.entries(selectedDays).sort(([a], [b]) => Number(a) - Number(b)))
                 {
                     const newDate = new Date(currentYear, parseInt(currentMonth)-1, currentDay)
                     const nextDate = new Date(lastDate)

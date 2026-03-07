@@ -55,9 +55,8 @@ describe('DiscordTimeHandler tests', () => {
     test("updateLongestAway_longestAwayLarger_DontUpdate", () => {
         let timeTracker = new TimeTracker(UserManager, Parse)
 
-        UserManager.getUser = jest.fn().mockImplementation(() => {
-            return new User('UserName', 0, false, new Date(), 'id', 0, "2025-02-11T09:30:00.000Z", 100, new Object(), new Object())
-        })
+        const user = new User('UserName', 0, false, new Date(), 'id', 0, "2025-02-11T09:30:00.000Z", 100, new Object(), new Object())
+        UserManager.getUser = jest.fn().mockImplementation(() => user)
 
         const mockDate = new Date('2025-02-11T10:00:00.000Z');
 
@@ -65,17 +64,17 @@ describe('DiscordTimeHandler tests', () => {
 
         timeTracker.updateLongestAway('id')
 
-        expect(Parse.Object).toHaveBeenCalledTimes(0)
+        expect(user.longestAway).toBe(100)
+        expect(Parse.Object).toHaveBeenCalledTimes(1)
     });
-    
-   
+
+
     test("updateLongestAway_longestAwayLarger_DontUpdate", () => {
         let timeTracker = new TimeTracker(UserManager, Parse)
 
-        UserManager.getUser = jest.fn().mockImplementation(() => {
-            return new User('UserName', 0, false, new Date(), 'id', 0, "2025-02-11T09:30:00.000Z", 100, new Object(), new Object())
-        })
-        
+        const user = new User('UserName', 0, false, new Date(), 'id', 0, "2025-02-11T09:30:00.000Z", 100, new Object(), new Object())
+        UserManager.getUser = jest.fn().mockImplementation(() => user)
+
         const leftTime = new Date('2025-02-11T10:00:00.000Z');
         const currentTime = new Date('2025-02-11T10:30:00.000Z');
 
@@ -86,7 +85,8 @@ describe('DiscordTimeHandler tests', () => {
 
         timeTracker.updateLongestAway('id')
 
-        expect(Parse.Object).toHaveBeenCalledTimes(0)
+        expect(user.longestAway).toBe(100)
+        expect(Parse.Object).toHaveBeenCalledTimes(1)
     });
 
     test("updateLongestAway_longestAwaySmaller_UpdateLongestAway", () => {
