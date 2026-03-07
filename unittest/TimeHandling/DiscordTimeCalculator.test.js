@@ -39,7 +39,7 @@ describe('DiscordTimeCalculator tests', () => {
 
         discordTimeCalculator = new DiscordTimeCalculator(DiscordTimeHandler)
 
-        let userTime = discordTimeCalculator.getUserTime({ userName: 'Alice', InDiscord: true, time: 3600, sessionTime: 1200, leftTime: 500, longestAway: 600, timeObject: {}}, 'All', 'All', 'All')
+        let userTime = discordTimeCalculator.getUserTime({ userName: 'Alice', inDiscord: true, time: 3600, sessionTime: 1200, leftTime: 500, longestAway: 600, timeObject: {}}, 'All', 'All', 'All')
 
         expect(userTime).toBe(3600)
     });
@@ -48,7 +48,7 @@ describe('DiscordTimeCalculator tests', () => {
 
         discordTimeCalculator = new DiscordTimeCalculator(DiscordTimeHandler)
 
-        let userTime = discordTimeCalculator.getUserTime({ userName: 'Alice', InDiscord: true, time: 3600, sessionTime: 1200, leftTime: 500, longestAway: 600, timeObject: {'2024': {'02': {'01': 30}}}}, 'All', 'All', 'All')
+        let userTime = discordTimeCalculator.getUserTime({ userName: 'Alice', inDiscord: true, time: 3600, sessionTime: 1200, leftTime: 500, longestAway: 600, timeObject: {'2024': {'02': {'01': 30}}}}, 'All', 'All', 'All')
 
         expect(userTime).toBe(3630)
     });
@@ -68,7 +68,7 @@ describe('DiscordTimeCalculator tests', () => {
 
         discordTimeCalculator = new DiscordTimeCalculator(DiscordTimeHandler)
 
-        let userTime = discordTimeCalculator.getUserTime({ userName: 'Alice', InDiscord: true, time: 0, sessionTime: 1200, leftTime: 500, longestAway: 600, timeObject: timeobj}, year, month, day)
+        let userTime = discordTimeCalculator.getUserTime({ userName: 'Alice', inDiscord: true, time: 0, sessionTime: 1200, leftTime: 500, longestAway: 600, timeObject: timeobj}, year, month, day)
 
         expect(userTime).toBe(result)
       });
@@ -77,7 +77,7 @@ describe('DiscordTimeCalculator tests', () => {
 
         discordTimeCalculator = new DiscordTimeCalculator(DiscordTimeHandler)
 
-        let longestAway = await discordTimeCalculator.getLongestAway({ userName: 'Alice', InDiscord: true, time: 3600, sessionTime: 1200, leftTime: 500, longestAway: 50, timeObject: {}}, 'All', 'All', 'All')
+        let longestAway = await discordTimeCalculator.getLongestAway({ userName: 'Alice', inDiscord: true, time: 3600, sessionTime: 1200, leftTime: 500, longestAway: 50, timeObject: {}}, 'All', 'All', 'All')
 
         expect(longestAway).toBe(50)
       });
@@ -91,7 +91,7 @@ describe('DiscordTimeCalculator tests', () => {
 
         jest.spyOn(global, 'Date').mockImplementationOnce(() => leftDate).mockImplementationOnce(() => leftDate).mockImplementationOnce(() => currentDate);
 
-        let longestAway = await discordTimeCalculator.getLongestAway({ userName: 'Alice', InDiscord: false, time: 3600, sessionTime: 1200, leftTime: new Date('2025-02-11T10:00:00.000Z'), longestAway: 40, timeObject: {} }, 'All', 'All', 'All')
+        let longestAway = await discordTimeCalculator.getLongestAway({ userName: 'Alice', inDiscord: false, time: 3600, sessionTime: 1200, leftTime: new Date('2025-02-11T10:00:00.000Z'), longestAway: 40, timeObject: {} }, 'All', 'All', 'All')
 
         expect(longestAway).toBe(40)
       });
@@ -105,7 +105,7 @@ describe('DiscordTimeCalculator tests', () => {
 
         jest.spyOn(global, 'Date').mockImplementationOnce(() => leftDate).mockImplementationOnce(() => leftDate).mockImplementationOnce(() => currentDate);
 
-        let longestAway = await discordTimeCalculator.getLongestAway({ userName: 'Alice', InDiscord: true, time: 3600, sessionTime: 1200, leftTime: new Date('2025-02-11T10:00:00.000Z'), longestAway: 40, timeObject: {} }, 'All', 'All', 'All')
+        let longestAway = await discordTimeCalculator.getLongestAway({ userName: 'Alice', inDiscord: true, time: 3600, sessionTime: 1200, leftTime: new Date('2025-02-11T10:00:00.000Z'), longestAway: 40, timeObject: {} }, 'All', 'All', 'All')
 
         expect(longestAway).toBe(40)
       });
@@ -119,7 +119,7 @@ describe('DiscordTimeCalculator tests', () => {
 
         jest.spyOn(global, 'Date').mockImplementationOnce(() => leftDate).mockImplementationOnce(() => leftDate).mockImplementationOnce(() => currentDate);
 
-        let longestAway = await discordTimeCalculator.getLongestAway({ userName: 'Alice', InDiscord: false, time: 3600, sessionTime: 1200, leftTime: new Date('2025-02-11T10:00:00.000Z'), longestAway: 40, timeObject: {} }, 'All', 'All', 'All')
+        let longestAway = await discordTimeCalculator.getLongestAway({ userName: 'Alice', inDiscord: false, time: 3600, sessionTime: 1200, leftTime: new Date('2025-02-11T10:00:00.000Z'), longestAway: 40, timeObject: {} }, 'All', 'All', 'All')
 
         expect(longestAway).toBe(50)
       });
@@ -149,7 +149,7 @@ describe('DiscordTimeCalculator tests', () => {
         global.Date.now = RealDate.now;
         global.Date.parse = RealDate.parse;
 
-        let longestAway = await discordTimeCalculator.getLongestAway({ userName: 'Alice', InDiscord: false, time: 3600, sessionTime: 1200, leftTime: new Date('2025-02-11T10:00:00.000Z'), longestAway: 40, timeObject: {'2024': {'01': {'01': 30, '03': 0, '05': 0}, '02': {'01': 0, '02': 0}}, '2025': {'01': {'01': 0, '04': 0, '05': 0}}} }, yearSelection, monthSelection, daySelection)
+        let longestAway = await discordTimeCalculator.getLongestAway({ userName: 'Alice', inDiscord: false, time: 3600, sessionTime: 1200, leftTime: new Date('2025-02-11T10:00:00.000Z'), longestAway: 40, timeObject: {'2024': {'01': {'01': 30, '03': 0, '05': 0}, '02': {'01': 0, '02': 0}}, '2025': {'01': {'01': 0, '04': 0, '05': 0}}} }, yearSelection, monthSelection, daySelection)
 
         expect(longestAway).toBe(result)
       });
@@ -163,7 +163,7 @@ describe('DiscordTimeCalculator tests', () => {
 
         discordTimeCalculator = new DiscordTimeCalculator(DiscordTimeHandler)
 
-         let streak = await discordTimeCalculator.getUserStreak({ userName: 'Alice', InDiscord: true, time: 3600, sessionTime: 1200, leftTime: new Date('2025-02-11T10:00:00.000Z'), longestAway: 40, timeObject: timeobj }, 'All', 'All', 'All')
+         let streak = await discordTimeCalculator.getUserStreak({ userName: 'Alice', inDiscord: true, time: 3600, sessionTime: 1200, leftTime: new Date('2025-02-11T10:00:00.000Z'), longestAway: 40, timeObject: timeobj }, 'All', 'All', 'All')
 
           expect(streak).toBe(result)
       });
@@ -178,7 +178,7 @@ describe('DiscordTimeCalculator tests', () => {
 
         discordTimeCalculator = new DiscordTimeCalculator(DiscordTimeHandler)
 
-         let streak = await discordTimeCalculator.getUserStreak({ userName: 'Alice', InDiscord: true, time: 3600, sessionTime: 1200, leftTime: new Date('2025-02-11T10:00:00.000Z'), longestAway: 40, timeObject: {'2024': {'01': {'01': 30, '02': 0}}, '2025': {'01' : {'03': 0, '04': 0, '05': 0, '07': 0, '10': 0, '11': 0}}} }, yearSelection, monthSelection, daySelection)
+         let streak = await discordTimeCalculator.getUserStreak({ userName: 'Alice', inDiscord: true, time: 3600, sessionTime: 1200, leftTime: new Date('2025-02-11T10:00:00.000Z'), longestAway: 40, timeObject: {'2024': {'01': {'01': 30, '02': 0}}, '2025': {'01' : {'03': 0, '04': 0, '05': 0, '07': 0, '10': 0, '11': 0}}} }, yearSelection, monthSelection, daySelection)
 
           expect(streak).toBe(result)
       });
@@ -192,7 +192,7 @@ describe('DiscordTimeCalculator tests', () => {
 
         jest.spyOn(global, 'Date').mockImplementationOnce(() => leftDate).mockImplementationOnce(() => leftDate).mockImplementationOnce(() => currentDate);
 
-        let sessionTime = await discordTimeCalculator.getSessionTime({ userName: 'Alice', InDiscord: false, time: 3600, sessionTime: 100, leftTime: new Date('2025-02-11T10:00:00.000Z'), longestAway: 40, timeObject: {'2024': {'02': {'01': 30, '02': 40}}}}, 'All', 'All', 'All')
+        let sessionTime = await discordTimeCalculator.getSessionTime({ userName: 'Alice', inDiscord: false, time: 3600, sessionTime: 100, leftTime: new Date('2025-02-11T10:00:00.000Z'), longestAway: 40, timeObject: {'2024': {'02': {'01': 30, '02': 40}}}}, 'All', 'All', 'All')
 
         expect(sessionTime).toBe(100)
       });
@@ -206,7 +206,7 @@ describe('DiscordTimeCalculator tests', () => {
 
         jest.spyOn(global, 'Date').mockImplementationOnce(() => leftDate).mockImplementationOnce(() => leftDate).mockImplementationOnce(() => currentDate);
 
-        let sessionTime = await discordTimeCalculator.getSessionTime({ userName: 'Alice', InDiscord: false, time: 3600, sessionTime: 0, leftTime: new Date('2025-02-11T10:00:00.000Z'), longestAway: 40, timeObject: {'2024': {'02': {'01': 30, '02': 40}}}}, '2024', 'Februari', 'All')
+        let sessionTime = await discordTimeCalculator.getSessionTime({ userName: 'Alice', inDiscord: false, time: 3600, sessionTime: 0, leftTime: new Date('2025-02-11T10:00:00.000Z'), longestAway: 40, timeObject: {'2024': {'02': {'01': 30, '02': 40}}}}, '2024', 'Februari', 'All')
 
         expect(sessionTime).toBe(40)
       });

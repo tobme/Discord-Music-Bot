@@ -119,5 +119,59 @@ describe('DiscordTimeHandler tests', () => {
     expect(Parse.Object.mock.instances[0].set).toHaveBeenCalledWith('amountPlayed', 3)
   });
 
+  test('getNextSong_EmptyMusicList_ExpectNull', () => {
+
+    const musicMock = new MusicManager()
+    musicMock.musicList = []
+    const queueMock = new QueueManager()
+    const shuffleManager = new ShuffleManager()
+
+    queueMock.getNextSong = jest.fn().mockReturnValueOnce(null)
+
+    const playbackManager = new PlaybackManager(musicMock, queueMock, shuffleManager, Parse)
+
+    const result = playbackManager.getNextSong()
+
+    expect(result).toBeNull()
+  });
+
+  test('addSong_validSong_ExpectMusicManagerCalled', () => {
+
+    const musicMock = new MusicManager()
+    const queueMock = new QueueManager()
+    const shuffleManager = new ShuffleManager()
+
+    const playbackManager = new PlaybackManager(musicMock, queueMock, shuffleManager, Parse)
+
+    playbackManager.addSong('SongName', 'url.mp3', true, '123', 'Artist', 'Rock')
+
+    expect(musicMock.addSong).toHaveBeenCalledWith('SongName', 'url.mp3', true, '123', 'Artist', 'Rock')
+  });
+
+  test('removeSong_existingSong_ExpectMusicManagerCalled', () => {
+
+    const musicMock = new MusicManager()
+    const queueMock = new QueueManager()
+    const shuffleManager = new ShuffleManager()
+
+    const playbackManager = new PlaybackManager(musicMock, queueMock, shuffleManager, Parse)
+
+    playbackManager.removeSong('SongName')
+
+    expect(musicMock.removeSong).toHaveBeenCalledWith('SongName')
+  });
+
+  test('getMusicList_returnsList_ExpectMusicList', () => {
+
+    const musicMock = new MusicManager()
+    const queueMock = new QueueManager()
+    const shuffleManager = new ShuffleManager()
+
+    const playbackManager = new PlaybackManager(musicMock, queueMock, shuffleManager, Parse)
+
+    const result = playbackManager.getMusicList()
+
+    expect(result).toEqual(musicMock.musicList)
+  });
 
 });

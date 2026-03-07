@@ -12,7 +12,7 @@ function getContentMenu(musicList, defaultValue)
     }
 
     let listedCategories = []
-    for (music of musicList)
+    for (const music of musicList)
     {
         if (music.category != undefined && !listedCategories.includes(music.category) && music.queueable)
         {
@@ -58,7 +58,7 @@ module.exports = {
         try
         {
           let string = ''
-          for (music of musicList)
+          for (const music of musicList)
           {
             if (music.hasOwnProperty("queueable") && music.hasOwnProperty("name") && music.hasOwnProperty("category"))
             {

@@ -8,7 +8,7 @@ class ShuffleManager {
         this.shuffleQueue = this.musicManager.musicList.map(({ fileUrl }) => ({ fileUrl }))
 
         for (let i = this.shuffleQueue.length - 1; i > 0; i--) {
-            let k = Math.floor(Math.random() * i);
+            let k = Math.floor(Math.random() * (i + 1));
             let tmp = this.shuffleQueue[k];
             this.shuffleQueue[k] = this.shuffleQueue[i];
             this.shuffleQueue[i] = tmp;

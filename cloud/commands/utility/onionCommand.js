@@ -131,7 +131,7 @@ async function getUserTimesScoreboard(timeCalculator, year, month, day)
       
       let tmpLongestAwayStr = out[i].longestAway
       tmpLongestAwayStr = Number(tmpLongestAwayStr)
-      let tmpLongestAway = tmpLongestAwayStr !== 0 ? convertToTime(tmpLongestAwayStr).padEnd(13, " ") : String("No Data").padEnd(13, " ")
+      let tmpLongestAway = tmpLongestAwayStr > 0 ? convertToTime(tmpLongestAwayStr).padEnd(13, " ") : String("No Data").padEnd(13, " ")
       string += tmpLongestAway + "  "
 
       let tmpStreak = out[i].streak.padEnd(6, " ")

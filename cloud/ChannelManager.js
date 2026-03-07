@@ -37,6 +37,11 @@ class ChannelManager
         try {
             const fileURL = this.playBackManger.getNextSong()
 
+            if (!fileURL) {
+                this.connection.destroy();
+                return;
+            }
+
             await entersState(this.connection, VoiceConnectionStatus.Ready, 20_000);
 
             const cacheDir = path.join(__dirname, 'cache');
@@ -74,7 +79,7 @@ class ChannelManager
         });
 
         try {
-            entersState(connection, VoiceConnectionStatus.Ready, 30e3);
+            await entersState(connection, VoiceConnectionStatus.Ready, 30e3);
             return connection;
         } catch (error) {
             connection.destroy();

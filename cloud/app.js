@@ -117,10 +117,10 @@ bot.on(Events.InteractionCreate, async interaction => {
 				{
 					await command2.update(interaction, context)
 				}
-				else 
+				else
 				{
-					console.error(error);
-					if (interaction.replied || interaction.deferred) 
+					console.error('No handler found for select menu interaction');
+					if (interaction.replied || interaction.deferred)
 					{
 						await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
 					} 
@@ -233,7 +233,7 @@ bot.on('voiceStateUpdate', (oldState, newState) => {
 		return
 	}
 	
-	if (oldUserChannel === null && newUserChannel !== undefined)
+	if (oldUserChannel === null && newUserChannel !== null)
 	{
 		console.log("User has joined " + newState.id)
 		

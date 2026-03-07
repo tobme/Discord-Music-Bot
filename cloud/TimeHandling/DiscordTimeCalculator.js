@@ -79,17 +79,12 @@ class DiscordTimeCalculator {
 
         const yearMatch = allYears || yearSelection == nowYear;
         const monthMatch = allMonths || monthSelection == nowMonth;
-        const dayRange = daySelection === 'All' ? [1, 31] : daySelection
-        const [startDay, endDay] = dayRange;
-        const dayMatch = daySelection === 'All' || (nowDay >= startDay && nowDay <= endDay);
+        const nowDayStr = nowDay.toString().padStart(2, '0');
+        const dayMatch = daySelection === 'All' || daySelection.includes(nowDayStr);
 
         if (yearMatch && monthMatch && dayMatch) {
             if (allMonths && allWeeks) {
             allDates.push(nowUtc);
-            } else {
-            const key = allWeeks ? `${nowYear}-${nowMonth}-W${nowWeek}` : `${nowYear}-${nowMonth}`;
-            if (!grouped[key]) grouped[key] = [];
-            grouped[key].push(nowUtc);
             }
         }
 
@@ -135,13 +130,13 @@ class DiscordTimeCalculator {
 
     async getLongestAway(user, year, month, day)
     {
-        console.log("Is in discord: " + Boolean(user.InDiscord))
+        console.log("Is in discord: " + Boolean(user.inDiscord))
 
         
         if (year === 'All' && month === 'All' && day === 'All')
         {
             // If user is in discord then the updated longest away is always largest
-            if (Boolean(user.InDiscord))
+            if (Boolean(user.inDiscord))
             {
                 return user.longestAway
             }

@@ -10,8 +10,10 @@ class PlaybackManager {
         let song = this.queueManager.getNextSong()
 
         if (!song) {
+            const list = this.musicManager.musicList;
+            if (list.length === 0) return null;
             song = Math.random() < 0.2
-                ? this.musicManager.musicList[Math.floor(Math.random() * this.musicManager.musicList.length)].fileUrl
+                ? list[Math.floor(Math.random() * list.length)].fileUrl
                 : this.shuffleManager.getShuffledSong()
         }
 
@@ -24,9 +26,9 @@ class PlaybackManager {
         return this.queueManager.addQueue(songName)
     }
 
-    addSong(songName, fileUrl, queueable, objectId, creatorName)
+    addSong(songName, fileUrl, queueable, objectId, creatorName, category)
     {
-        this.musicManager.addSong(songName, fileUrl, queueable, objectId, creatorName)
+        this.musicManager.addSong(songName, fileUrl, queueable, objectId, creatorName, category)
     }
 
     removeSong(songName)

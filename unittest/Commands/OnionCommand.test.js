@@ -157,8 +157,19 @@ describe('DiscordTimeHandler tests', () => {
         interaction = MockInteraction({currentUserId: 'newUserId'})
 
         await update(interaction, context)
-    
+
         expect(interaction.reply).toHaveBeenCalledTimes(1)
+      });
+
+      test('update_correctUserChangesYear_expectUpdateCalledWithNewYear', async () => {
+
+        interaction = MockInteraction({customId: 'year', values: '2025'})
+
+        await update(interaction, context)
+
+        expect(interaction.reply).not.toHaveBeenCalled()
+        expect(interaction.update).toHaveBeenCalledTimes(1)
+        expect(context.timeCalculator.getTimeData).toHaveBeenCalledWith('2025', 'All', 'All')
       });
   });
   

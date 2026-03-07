@@ -5,3 +5,5 @@ auth.js
 .husky
 mcp.json
 cloud/cache
+cloud/node_modules
+ai/.env

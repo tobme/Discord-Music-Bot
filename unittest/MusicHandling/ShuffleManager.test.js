@@ -61,6 +61,18 @@ describe('DiscordTimeHandler tests', () => {
     expect(Object.keys(shuffleManager.shuffleQueue).length).toBe(12)
   });
 
+  test('getShuffledSong_emptyMusicList_expectNull', () => {
+
+    const musicMock = new MusicManager()
+    musicMock.musicList = []
+
+    const shuffleManager = new ShuffleManager(musicMock)
+
+    const result = shuffleManager.getShuffledSong()
+
+    expect(result).toBeNull()
+  });
+
   test('getShuffledSong_getNextSong_ExpectNextSong', async () => {
 
     const musicMock = new MusicManager()
