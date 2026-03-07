@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onion Score — Discan</title>
+  <script src="https://npmcdn.com/parse/dist/parse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d1a;
+      --surface: #16162a;
+      --surface-2: #1e1e38;
+      --border: rgba(124, 58, 237, 0.2);
+      --border-strong: rgba(124, 58, 237, 0.4);
+      --accent: #7c3aed;
+      --accent-2: #a855f7;
+      --accent-3: #38bdf8;
+      --text: #e2e8f0;
+      --muted: #8892a4;
+      --radius: 1rem;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100dvh;
+      padding: 0 0 4rem;
+      background-image: radial-gradient(ellipse 70% 40% at 50% 0%, rgba(124, 58, 237, 0.15) 0%, transparent 65%);
+    }
+
+    /* ---- Header ---- */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(13, 13, 26, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      padding: 0.4rem 0.75rem;
+      border-radius: 0.5rem;
+      transition: color 0.2s, background 0.2s;
+      white-space: nowrap;
+    }
+
+    .back-btn:hover { color: var(--text); background: var(--surface-2); }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #a855f7, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      white-space: nowrap;
+    }
+
+    .refresh-btn {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 0.6rem;
+      padding: 0.45rem 0.9rem;
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      white-space: nowrap;
+    }
+
+    .refresh-btn:hover { border-color: var(--accent-2); background: var(--surface); }
+
+    /* ---- Main ---- */
+    main {
+      max-width: 1020px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem;
+    }
+
+    /* ---- Meta row ---- */
+    .meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .updated-time, .user-count { color: var(--muted); font-size: 0.8rem; }
+
+    /* ---- Filter row ---- */
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      align-items: flex-end;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      flex: 1;
+      min-width: 130px;
+    }
+
+    .filter-group label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .filter-group select {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 0.6rem;
+      padding: 0.55rem 2rem 0.55rem 0.75rem;
+      color: var(--text);
+      font-size: 0.875rem;
+      font-family: inherit;
+      width: 100%;
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238892a4' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.65rem center;
+      transition: border-color 0.2s;
+    }
+
+    .filter-group select:focus { border-color: var(--accent-2); }
+
+    /* ---- Loading ---- */
+    #loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 5rem 2rem;
+      color: var(--muted);
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent-2);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ---- Error ---- */
+    #error-msg {
+      display: none;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      color: #fca5a5;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ---- Table container ---- */
+    #table-container { display: none; }
+
+    .table-wrap {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      min-width: 620px;
+    }
+
+    thead { background: var(--surface-2); }
+
+    thead th {
+      padding: 0.9rem 1rem;
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    thead th:first-child { text-align: center; width: 3.5rem; }
+
+    tbody tr {
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      transition: background 0.15s;
+    }
+
+    tbody tr:hover { background: var(--surface-2); }
+
+    tbody tr.top-1 { background: rgba(255, 215, 0, 0.05); }
+    tbody tr.top-2 { background: rgba(192, 192, 192, 0.05); }
+    tbody tr.top-3 { background: rgba(205, 127, 50, 0.05); }
+
+    td {
+      padding: 0.85rem 1rem;
+      vertical-align: middle;
+    }
+
+    td:first-child {
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--muted);
+      width: 3.5rem;
+    }
+
+    .pos-medal { font-size: 1.3rem; }
+    .name-cell { font-weight: 600; }
+    .time-cell { font-variant-numeric: tabular-nums; }
+    .session-cell { font-variant-numeric: tabular-nums; color: var(--accent-3); }
+    .away-cell  { font-variant-numeric: tabular-nums; color: var(--muted); }
+    .streak-cell { font-variant-numeric: tabular-nums; color: var(--accent-2); }
+
+    .name-btn {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-weight: 600;
+      font-size: inherit;
+      font-family: inherit;
+      cursor: pointer;
+      padding: 0;
+      text-align: left;
+      text-decoration: underline;
+      text-decoration-color: transparent;
+      text-underline-offset: 3px;
+      transition: color 0.15s, text-decoration-color 0.15s;
+    }
+
+    .name-btn:hover { color: var(--accent-2); text-decoration-color: var(--accent-2); }
+
+    /* ---- Chart ---- */
+    .chart-section {
+      margin-top: 2rem;
+    }
+
+    .chart-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .chart-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 1.25rem 1rem;
+      height: 280px;
+      position: relative;
+    }
+
+    /* ---- Profile view ---- */
+    #profile-view { display: none; }
+
+    .profile-main {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 4rem;
+    }
+
+    .profile-back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--muted);
+      background: none;
+      border: none;
+      font-size: 0.875rem;
+      padding: 0.4rem 0.75rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-family: inherit;
+      margin-bottom: 2rem;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .profile-back-btn:hover { color: var(--text); background: var(--surface-2); }
+
+    .profile-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .avatar {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 1rem;
+      box-shadow: 0 8px 30px rgba(124, 58, 237, 0.35);
+    }
+
+    .profile-hero h2 { font-size: 1.75rem; font-weight: 800; }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      animation: fadeUp 0.4s 0.1s ease both;
+      opacity: 0;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .stat-icon { font-size: 1.5rem; margin-bottom: 0.25rem; line-height: 1; }
+    .stat-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+    .stat-value { font-size: 1.25rem; font-weight: 800; line-height: 1.2; }
+    .stat-sub   { font-size: 0.8rem; color: var(--muted); line-height: 1.4; }
+    .stat-sub-header { display: block; font-size: 0.95rem; font-weight: 700; color: var(--accent-2); margin-top: 0.4rem; margin-bottom: 0.15rem; }
+    .stat-sub-item   { display: block; font-size: 0.78rem; color: var(--muted); padding-left: 0.6rem; line-height: 1.6; }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 540px) {
+      .table-wrap { border-radius: 0; border-left: none; border-right: none; }
+      main { padding: 1.5rem 0; }
+      .meta-row, .filter-row { padding: 0 1.25rem; }
+    }
+
+    /* ---- Animations ---- */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #table-container.visible { animation: fadeUp 0.4s ease both; }
+
+    /* ---- Sounds count button ---- */
+    .sounds-count-btn {
+      background: none;
+      border: none;
+      color: var(--accent-2);
+      font-size: 1.25rem;
+      font-weight: 800;
+      font-family: inherit;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+      text-decoration-color: transparent;
+      text-underline-offset: 3px;
+      transition: text-decoration-color 0.15s;
+      line-height: 1.2;
+    }
+    .sounds-count-btn:hover { text-decoration-color: var(--accent-2); }
+    .sounds-count-btn:disabled { color: var(--text); cursor: default; text-decoration: none; }
+
+    /* ---- Sounds view ---- */
+    #sounds-view { display: none; }
+
+    .sounds-main {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 4rem;
+    }
+
+    .sounds-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 1.75rem;
+    }
+
+    .sounds-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .sound-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 0.85rem 1.25rem;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .sound-item:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-2);
+    }
+
+    .sound-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .sound-date {
+      font-size: 0.8rem;
+      color: var(--muted);
+      white-space: nowrap;
+      margin-left: 1rem;
+    }
+  </style>
+
+  <script>
+    Parse.initialize("Sjm2UWe5M1qrbE4vzGr4ykNBAu5ldf8K8FFQndyx", "EiZ7UGHpfd9OAKPmHGzIdEjd2y6PRAo51rHCWBQE");
+    Parse.serverURL = 'https://parseapi.back4app.com/';
+
+    // Raw Parse data, kept in memory so filter changes don't need a new fetch
+    let rawData   = [];
+    let allSounds = [];
+
+    // -----------------------------------------------------------------------
+    // Ported from cloud/TimeHandling/DiscordTimeCalculator.js
+    // -----------------------------------------------------------------------
+
+    const MONTH_TO_INT = {
+      All: 'All', Januari: '01', Februari: '02', Mars: '03', April: '04',
+      Maj: '05', Juni: '06', Juli: '07', Augusti: '08', September: '09',
+      Oktober: '10', November: '11', December: '12'
+    };
+
+    // Note: selectionString == 'All' intentionally uses JS type coercion so
+    // that passing ['All'] (an array) also matches, mirroring the server code.
+    function getUserObject(object, selectionString) {
+      if (selectionString == 'All') return object;
+      const ret = {};
+      for (const [key, val] of Object.entries(object)) {
+        if (selectionString.includes(key)) ret[key] = val;
+      }
+      return ret;
+    }
+
+    function splitDay(daySelection) {
+      const [from, to] = daySelection.split('-').map(Number);
+      const arr = [];
+      for (let i = from; i <= to; i++) arr.push(i < 10 ? '0' + i : String(i));
+      return arr;
+    }
+
+    function getUserTime(user, yearSelection, monthSelection, daySelection) {
+      let time = 0;
+
+      if (yearSelection === 'All' && monthSelection === 'All' && daySelection === 'All')
+        time += Number(user.time) || 0;
+
+      let daySel = daySelection;
+      if (daySelection !== 'All') daySel = splitDay(daySelection);
+
+      const monthInt = MONTH_TO_INT[monthSelection];
+
+      const selectedYears = getUserObject(user.timeObject || {}, [yearSelection]);
+      for (const [, years] of Object.entries(selectedYears)) {
+        const selectedMonths = getUserObject(years, [monthInt]);
+        for (const [, month] of Object.entries(selectedMonths)) {
+          const selectedDays = getUserObject(month, daySel);
+          for (const [, day] of Object.entries(selectedDays)) {
+            time += Number(day);
+          }
+        }
+      }
+      return time;
+    }
+
+    function getSessionTime(user, yearSelection, monthSelection, daySelection) {
+      if (yearSelection === 'All' && monthSelection === 'All' && daySelection === 'All')
+        return Number(user.sessionTime) || 0;
+
+      let daySel = daySelection;
+      if (daySelection !== 'All') daySel = splitDay(daySelection);
+
+      const monthInt = MONTH_TO_INT[monthSelection];
+
+      let sessionTime = 0;
+      const selectedYears = getUserObject(user.timeObject || {}, [yearSelection]);
+      for (const [, years] of Object.entries(selectedYears)) {
+        const selectedMonths = getUserObject(years, [monthInt]);
+        for (const [, month] of Object.entries(selectedMonths)) {
+          const selectedDays = getUserObject(month, daySel);
+          for (const [, day] of Object.entries(selectedDays)) {
+            sessionTime = Math.max(sessionTime, Number(day));
+          }
+        }
+      }
+      return sessionTime;
+    }
+
+    function getUserStreak(user, yearSelection, monthSelection, daySelection) {
+      let ret = 0, streak = 0;
+
+      let daySel = daySelection;
+      if (daySelection !== 'All') daySel = splitDay(daySelection);
+
+      const monthInt = MONTH_TO_INT[monthSelection];
+
+      const selectedYears = getUserObject(user.timeObject || {}, [yearSelection]);
+      const lastDate = new Date();
+
+      for (const [currentYear, years] of Object.entries(selectedYears)) {
+        const selectedMonths = getUserObject(years, [monthInt]);
+        for (const [currentMonth, month] of Object.entries(selectedMonths).sort(([a], [b]) => Number(a) - Number(b))) {
+          const selectedDays = getUserObject(month, daySel);
+          for (const [currentDay] of Object.entries(selectedDays).sort(([a], [b]) => Number(a) - Number(b))) {
+            const newDate  = new Date(parseInt(currentYear), parseInt(currentMonth) - 1, parseInt(currentDay));
+            const nextDate = new Date(lastDate);
+            nextDate.setDate(nextDate.getDate() + 1);
+
+            if (nextDate.getDate()     === newDate.getDate()     &&
+                nextDate.getMonth()    === newDate.getMonth()    &&
+                nextDate.getFullYear() === newDate.getFullYear()) {
+              streak++;
+            } else {
+              streak = 1;
+            }
+            ret = Math.max(ret, streak);
+            lastDate.setDate(newDate.getDate());
+            lastDate.setMonth(newDate.getMonth());
+            lastDate.setFullYear(newDate.getFullYear());
+          }
+        }
+      }
+      return String(ret);
+    }
+
+    // ---- Longest Away ----
+
+    function getWeekNumber(date) {
+      const temp = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const dayNum = temp.getUTCDay() || 7;
+      temp.setUTCDate(temp.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(temp.getUTCFullYear(), 0, 1));
+      return Math.ceil(((temp - yearStart) / 86400000 + 1) / 7).toString().padStart(2, '0');
+    }
+
+    function findLongestGap(dates) {
+      if (dates.length < 2) return -1;
+      let maxGap = 0;
+      for (let i = 1; i < dates.length; i++) {
+        const gap = (dates[i] - dates[i - 1]) / (1000 * 60);
+        if (gap > maxGap) maxGap = gap;
+      }
+      return maxGap;
+    }
+
+    function extractFilteredDates(user, yearSelection, monthSelection, weekSelection) {
+      const allDates = [];
+      const grouped  = {};
+      const allYears  = yearSelection  === 'All';
+      const allMonths = monthSelection === 'All';
+      const allWeeks  = weekSelection  === 'All';
+
+      let daySelection = 'All';
+      if (weekSelection !== 'All') daySelection = splitDay(weekSelection);
+
+      const monthInt = MONTH_TO_INT[monthSelection];
+
+      const selectedYears = getUserObject(user.timeObject || {}, [yearSelection]);
+
+      for (const [yearDate, years] of Object.entries(selectedYears)) {
+        const selectedMonths = getUserObject(years, [monthInt]);
+        for (const [monthDate, month] of Object.entries(selectedMonths)) {
+          const selectedDays = getUserObject(month, daySelection);
+          for (const [day] of Object.entries(selectedDays)) {
+            const m    = monthDate.padStart(2, '0');
+            const d    = day.padStart(2, '0');
+            const date = new Date(`${yearDate}-${m}-${d}`);
+            const week = getWeekNumber(date);
+
+            if (allMonths && allWeeks) {
+              allDates.push(date);
+            } else {
+              const key = allWeeks
+                ? `${yearDate}-${m}`
+                : `${yearDate}-${m}-W${week}`;
+              if (!grouped[key]) grouped[key] = [];
+              grouped[key].push(date);
+            }
+          }
+        }
+      }
+
+      // Include current date if it falls within the filter
+      const now    = new Date();
+      const nowUtc = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+      const nowYear  = now.getFullYear().toString();
+      const nowMonth = (now.getMonth() + 1).toString().padStart(2, '0');
+      const nowDay   = nowUtc.getDate();
+
+      const yearMatch  = allYears  || yearSelection === nowYear;
+      const monthMatch = allMonths || monthInt === nowMonth;
+      const nowDayStr  = nowDay.toString().padStart(2, '0');
+      const dayMatch   = daySelection === 'All' || daySelection.includes(nowDayStr);
+
+      if (yearMatch && monthMatch && dayMatch && allMonths && allWeeks) {
+        allDates.push(nowUtc);
+      }
+
+      if (allMonths && allWeeks) {
+        return { mode: 'global', dates: allDates.sort((a, b) => a - b) };
+      } else {
+        for (const key in grouped) grouped[key].sort((a, b) => a - b);
+        return { mode: 'grouped', dates: grouped };
+      }
+    }
+
+    function getMaxGap(user, yearFilter, monthFilter, weekFilter) {
+      const { mode, dates } = extractFilteredDates(user, yearFilter, monthFilter, weekFilter);
+
+      if (mode === 'global') {
+        const periodStart = new Date(Date.UTC(parseInt(yearFilter), 0, 1));
+        return findLongestGap([periodStart, ...dates]);
+      }
+
+      const startDay = weekFilter === 'All' ? 1 : parseInt(weekFilter.split('-')[0]);
+      let maxGap = 0;
+
+      for (const key in dates) {
+        const parts       = key.split('-');
+        const y           = parseInt(parts[0]);
+        const m           = parseInt(parts[1]) - 1;
+        const periodStart = new Date(Date.UTC(y, m, startDay));
+        const gap         = findLongestGap([periodStart, ...dates[key]]);
+        if (gap > maxGap) maxGap = gap;
+      }
+      return maxGap;
+    }
+
+    function getLongestAway(user, year, month, day) {
+      if (year === 'All' && month === 'All' && day === 'All') {
+        if (user.inDiscord) return Number(user.longestAway) || 0;
+        const leftTime = user.leftTime;
+        if (!leftTime || leftTime === '-1') return Number(user.longestAway) || 0;
+        const timeSinceLeft = Math.round((new Date() - new Date(leftTime)) / (1000 * 60));
+        return timeSinceLeft > Number(user.longestAway) ? timeSinceLeft : Number(user.longestAway);
+      }
+      return getMaxGap(user, year, month, day);
+    }
+
+    // -----------------------------------------------------------------------
+    // Data loading & rendering
+    // -----------------------------------------------------------------------
+
+    function convertToTime(minutes) {
+      let m = Number(minutes);
+      const days  = Math.floor(m / (60 * 24)); m -= days  * (60 * 24);
+      const hours = Math.floor(m / 60);         m -= hours * 60;
+      let out = '';
+      if (days)  out += days  + 'd ';
+      if (hours) out += hours + 'h ';
+      if (m)     out += Math.round(m) + 'm';
+      return out || '0m';
+    }
+
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    async function loadData() {
+      document.getElementById('loading').style.display        = 'flex';
+      document.getElementById('table-container').style.display = 'none';
+      document.getElementById('error-msg').style.display      = 'none';
+      document.getElementById('table-container').classList.remove('visible');
+
+      try {
+        const TimeInDiscord = Parse.Object.extend('TimeInDiscord');
+        const query = new Parse.Query(TimeInDiscord).limit(1000);
+        const results = await query.find();
+
+        rawData = results.map(obj => ({
+          name:        obj.get('name')        || '—',
+          time:        Number(obj.get('time')) || 0,
+          sessionTime: obj.get('sessionTime') || 0,
+          longestAway: obj.get('longestAway') || 0,
+          leftTime:    obj.get('leftTime')    || '-1',
+          inDiscord:   Boolean(obj.get('inDiscord')),
+          timeObject:   obj.get('timeObject')   || {},
+          farmingObject: obj.get('farmingObject') || {},
+        }));
+
+        document.getElementById('updated-time').textContent =
+          'Uppdaterad: ' + new Date().toLocaleString('sv-SE');
+        document.getElementById('user-count').textContent =
+          rawData.length + ' användare';
+
+        const Sounds = Parse.Object.extend('Sounds');
+        const soundsQuery = new Parse.Query(Sounds).limit(10000);
+        const soundResults = await soundsQuery.find();
+        allSounds = soundResults.map(obj => {
+          const file = obj.get('File');
+          let name = file ? file.name() : '';
+          name = name.substring(name.indexOf('_') + 1);
+          name = name.substring(0, name.lastIndexOf('.'));
+          return {
+            name,
+            creator:   obj.get('creator') || '',
+            createdAt: obj.createdAt,
+          };
+        });
+
+        applyFilters();
+        buildChart();
+
+      } catch (err) {
+        document.getElementById('error-msg').style.display = 'block';
+        document.getElementById('error-msg').textContent =
+          'Kunde inte hämta data: ' + err.message;
+      }
+
+      document.getElementById('loading').style.display = 'none';
+      const tc = document.getElementById('table-container');
+      tc.style.display = 'block';
+      // Trigger reflow so the animation re-plays after refresh
+      void tc.offsetWidth;
+      tc.classList.add('visible');
+    }
+
+    function applyFilters() {
+      const year  = document.getElementById('filter-year').value;
+      const month = document.getElementById('filter-month').value;
+      const day   = document.getElementById('filter-day').value;
+
+      const computed = rawData.map(user => ({
+        name:        user.name,
+        time:        getUserTime(user, year, month, day),
+        sessionTime: getSessionTime(user, year, month, day),
+        longestAway: getLongestAway(user, year, month, day),
+        streak:      getUserStreak(user, year, month, day),
+      }));
+
+      computed.sort((a, b) => b.time - a.time);
+      renderTable(computed);
+    }
+
+    function renderTable(data) {
+      const tbody  = document.getElementById('score-body');
+      tbody.innerHTML = '';
+      const medals = ['&#129351;', '&#129352;', '&#129353;'];
+
+      data.forEach((user, i) => {
+        const tr = document.createElement('tr');
+        if (i < 3) tr.className = 'top-' + (i + 1);
+
+        const posCell  = i < 3 ? `<span class="pos-medal">${medals[i]}</span>` : i + 1;
+        const awayText = Number(user.longestAway) > 0 ? convertToTime(user.longestAway) : '—';
+
+        tr.innerHTML = `
+          <td>${posCell}</td>
+          <td class="name-cell"><button class="name-btn" data-name="${escHtml(user.name)}">${escHtml(user.name)}</button></td>
+          <td class="time-cell">${convertToTime(user.time)}</td>
+          <td class="session-cell">${convertToTime(user.sessionTime)}</td>
+          <td class="away-cell">${awayText}</td>
+          <td class="streak-cell">${escHtml(user.streak)}</td>
+        `;
+        tr.querySelector('.name-btn').addEventListener('click', () => {
+          const raw = rawData.find(u => u.name === user.name);
+          if (raw) showProfile(raw);
+        });
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    // -----------------------------------------------------------------------
+    // Chart — total timeObject per month across all users
+    // -----------------------------------------------------------------------
+
+    function buildChart() {
+      const monthTotals = {};
+
+      for (const user of rawData) {
+        for (const [year, months] of Object.entries(user.timeObject || {})) {
+          for (const [month, days] of Object.entries(months)) {
+            const key = year + '-' + month.padStart(2, '0');
+            if (!monthTotals[key]) monthTotals[key] = 0;
+            for (const [, time] of Object.entries(days)) {
+              monthTotals[key] += Number(time);
+            }
+          }
+        }
+      }
+
+      const sortedKeys = Object.keys(monthTotals).sort();
+      const monthNames = ['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+      const labels = sortedKeys.map(key => {
+        const [year, month] = key.split('-');
+        return monthNames[parseInt(month) - 1] + ' ' + year;
+      });
+      const values = sortedKeys.map(key => Math.round(monthTotals[key] / 60)); // minutes → hours
+
+      if (window._chart) window._chart.destroy();
+
+      const ctx = document.getElementById('time-chart').getContext('2d');
+      window._chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            data: values,
+            backgroundColor: 'rgba(124, 58, 237, 0.5)',
+            borderColor: '#a855f7',
+            borderWidth: 2,
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => ctx.parsed.y + 'h totalt'
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#8892a4', font: { size: 11 }, maxRotation: 45 },
+              grid:  { color: 'rgba(124, 58, 237, 0.08)' },
+            },
+            y: {
+              ticks: { color: '#8892a4', font: { size: 11 }, callback: v => v + 'h' },
+              grid:  { color: 'rgba(124, 58, 237, 0.08)' },
+              beginAtZero: true,
+            }
+          }
+        }
+      });
+    }
+
+    function buildUserChart(user) {
+      const monthTotals = {};
+
+      for (const [year, months] of Object.entries(user.timeObject || {})) {
+        for (const [month, days] of Object.entries(months)) {
+          const key = year + '-' + month.padStart(2, '0');
+          if (!monthTotals[key]) monthTotals[key] = 0;
+          for (const [, time] of Object.entries(days)) {
+            monthTotals[key] += Number(time);
+          }
+        }
+      }
+
+      const sortedKeys = Object.keys(monthTotals).sort();
+      const monthNames = ['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+      const labels = sortedKeys.map(key => {
+        const [year, month] = key.split('-');
+        return monthNames[parseInt(month) - 1] + ' ' + year;
+      });
+      const values = sortedKeys.map(key => Math.round(monthTotals[key] / 60));
+
+      if (window._userChart) window._userChart.destroy();
+
+      const ctx = document.getElementById('user-time-chart').getContext('2d');
+      window._userChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            data: values,
+            backgroundColor: 'rgba(124, 58, 237, 0.5)',
+            borderColor: '#a855f7',
+            borderWidth: 2,
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: { label: ctx => ctx.parsed.y + 'h' }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#8892a4', font: { size: 11 }, maxRotation: 45 },
+              grid:  { color: 'rgba(124, 58, 237, 0.08)' },
+            },
+            y: {
+              ticks: { color: '#8892a4', font: { size: 11 }, callback: v => v + 'h' },
+              grid:  { color: 'rgba(124, 58, 237, 0.08)' },
+              beginAtZero: true,
+            }
+          }
+        }
+      });
+    }
+
+    // -----------------------------------------------------------------------
+    // Profile — all calculations use timeObject only
+    // -----------------------------------------------------------------------
+
+    function formatDate(date) {
+      const months = ['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec'];
+      return date.getDate() + ' ' + months[date.getMonth()] + ' ' + date.getFullYear();
+    }
+
+    // Year with the most total time, plus its share of all-time total
+    function getBestYear(timeObject) {
+      const yearTotals = {};
+      let grandTotal = 0;
+      for (const [year, months] of Object.entries(timeObject || {})) {
+        let yearTotal = 0;
+        for (const [, days] of Object.entries(months)) {
+          for (const [, time] of Object.entries(days)) {
+            yearTotal += Number(time);
+          }
+        }
+        yearTotals[year] = yearTotal;
+        grandTotal += yearTotal;
+      }
+      if (grandTotal === 0) return null;
+      const bestYear = Object.entries(yearTotals).sort((a, b) => b[1] - a[1])[0];
+      return {
+        year: bestYear[0],
+        time: bestYear[1],
+        pct: Math.round((bestYear[1] / grandTotal) * 100),
+      };
+    }
+
+    // Day with the highest single-day value in timeObject
+    function getBestDay(timeObject) {
+      let best = null;
+      for (const [year, months] of Object.entries(timeObject || {})) {
+        for (const [month, days] of Object.entries(months)) {
+          for (const [day, time] of Object.entries(days)) {
+            if (!best || Number(time) > best.time)
+              best = { year, month, day, time: Number(time) };
+          }
+        }
+      }
+      return best;
+    }
+
+    // Start and end date of the longest consecutive-day streak
+    function getLongestStreakPeriod(timeObject) {
+      const dates = [];
+      for (const [year, months] of Object.entries(timeObject || {})) {
+        for (const [month, days] of Object.entries(months)) {
+          for (const [day] of Object.entries(days)) {
+            dates.push(new Date(parseInt(year), parseInt(month) - 1, parseInt(day)));
+          }
+        }
+      }
+
+      dates.sort((a, b) => a - b);
+      if (dates.length === 0) return null;
+
+      let maxStreak = 1, currentStreak = 1;
+      let currentStart = dates[0], bestStart = dates[0], bestEnd = dates[0];
+
+      for (let i = 1; i < dates.length; i++) {
+        const diffDays = Math.round((dates[i] - dates[i - 1]) / 86400000);
+        if (diffDays === 1) {
+          currentStreak++;
+          if (currentStreak > maxStreak) {
+            maxStreak  = currentStreak;
+            bestStart  = currentStart;
+            bestEnd    = dates[i];
+          }
+        } else {
+          currentStreak = 1;
+          currentStart  = dates[i];
+        }
+      }
+      return { days: maxStreak, start: bestStart, end: bestEnd };
+    }
+
+    // Start date of the current ongoing streak (null if streak is broken)
+    function getCurrentStreakStart(timeObject) {
+      const dates = [];
+      for (const [year, months] of Object.entries(timeObject || {})) {
+        for (const [month, days] of Object.entries(months)) {
+          for (const [day] of Object.entries(days)) {
+            dates.push(new Date(parseInt(year), parseInt(month) - 1, parseInt(day)));
+          }
+        }
+      }
+
+      dates.sort((a, b) => b - a); // descending
+      if (dates.length === 0) return null;
+
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const mostRecent = new Date(dates[0]); mostRecent.setHours(0, 0, 0, 0);
+
+      // Streak is active only if most recent day is today or yesterday
+      if (Math.round((today - mostRecent) / 86400000) > 1) return null;
+
+      let streakStart = mostRecent;
+      let days = 1;
+      for (let i = 1; i < dates.length; i++) {
+        const prev = new Date(dates[i - 1]); prev.setHours(0, 0, 0, 0);
+        const curr = new Date(dates[i]);     curr.setHours(0, 0, 0, 0);
+        if (Math.round((prev - curr) / 86400000) === 1) {
+          streakStart = curr;
+          days++;
+        } else {
+          break;
+        }
+      }
+      return { start: streakStart, days };
+    }
+
+    // Farming % = farmingObject / (timeObject + farmingObject) across all days
+    function getFarmingRatio(timeObject, farmingObject) {
+      let totalTime = 0, totalFarming = 0;
+
+      for (const [year, months] of Object.entries(timeObject || {})) {
+        for (const [month, days] of Object.entries(months)) {
+          for (const [day, time] of Object.entries(days)) {
+            totalTime += Number(time);
+            totalFarming += Number(farmingObject?.[year]?.[month]?.[day] || 0);
+          }
+        }
+      }
+
+      // Also count farming days not present in timeObject
+      for (const [year, months] of Object.entries(farmingObject || {})) {
+        for (const [month, days] of Object.entries(months)) {
+          for (const [day, time] of Object.entries(days)) {
+            if (!timeObject?.[year]?.[month]?.[day]) totalFarming += Number(time);
+          }
+        }
+      }
+
+      const total = totalTime + totalFarming;
+      if (total === 0) return null;
+      return Math.round((totalFarming / total) * 100);
+    }
+
+    // Day with the highest farming percentage: farmingObject / (timeObject + farmingObject)
+    function getBestFarmingRatioDay(timeObject, farmingObject) {
+      let best = null;
+      for (const [year, months] of Object.entries(farmingObject || {})) {
+        for (const [month, days] of Object.entries(months)) {
+          for (const [day, farmTime] of Object.entries(days)) {
+            const discordTime = Number(timeObject?.[year]?.[month]?.[day] || 0);
+            const farming = Number(farmTime);
+            const total = discordTime + farming;
+            if (total === 0) continue;
+            const ratio = Math.round((farming / total) * 100);
+            if (!best || ratio > best.ratio)
+              best = { year, month, day, ratio, discordTime, farming };
+          }
+        }
+      }
+      return best;
+    }
+
+    // Day with the highest farmingObject value
+    function getBestFarmingDay(farmingObject) {
+      let best = null;
+      for (const [year, months] of Object.entries(farmingObject || {})) {
+        for (const [month, days] of Object.entries(months)) {
+          for (const [day, time] of Object.entries(days)) {
+            if (!best || Number(time) > best.time)
+              best = { year, month, day, time: Number(time) };
+          }
+        }
+      }
+      return best;
+    }
+
+    // Which weekday has the most total minutes in timeObject
+    function getBestWeekday(timeObject) {
+      const names  = ['Söndag','Måndag','Tisdag','Onsdag','Torsdag','Fredag','Lördag'];
+      const totals = new Array(7).fill(0);
+      for (const [year, months] of Object.entries(timeObject || {})) {
+        for (const [month, days] of Object.entries(months)) {
+          for (const [day, time] of Object.entries(days)) {
+            const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+            totals[d.getDay()] += Number(time);
+          }
+        }
+      }
+      const maxIdx = totals.indexOf(Math.max(...totals));
+      return { name: names[maxIdx], time: totals[maxIdx] };
+    }
+
+    function showProfile(user) {
+      document.getElementById('avatar-initial').textContent = user.name.charAt(0).toUpperCase();
+      document.getElementById('profile-name').textContent   = user.name;
+
+      const bestDay = getBestDay(user.timeObject);
+      if (bestDay) {
+        const d = new Date(parseInt(bestDay.year), parseInt(bestDay.month) - 1, parseInt(bestDay.day));
+        document.getElementById('stat-best-day-val').textContent = formatDate(d);
+        document.getElementById('stat-best-day-sub').textContent = convertToTime(bestDay.time);
+      } else {
+        document.getElementById('stat-best-day-val').textContent = '—';
+        document.getElementById('stat-best-day-sub').textContent = '';
+      }
+
+      const streak = getLongestStreakPeriod(user.timeObject);
+      if (streak) {
+        document.getElementById('stat-streak-val').textContent = streak.days + ' dagar';
+        document.getElementById('stat-streak-sub').textContent =
+          formatDate(streak.start) + ' – ' + formatDate(streak.end);
+      } else {
+        document.getElementById('stat-streak-val').textContent = '—';
+        document.getElementById('stat-streak-sub').textContent = '';
+      }
+
+      const weekday = getBestWeekday(user.timeObject);
+      document.getElementById('stat-weekday-val').textContent = weekday.name;
+      document.getElementById('stat-weekday-sub').textContent = convertToTime(weekday.time) + ' totalt';
+
+      const currentStart = getCurrentStreakStart(user.timeObject);
+      if (currentStart) {
+        document.getElementById('stat-current-streak-val').textContent = currentStart.days + ' dagar';
+        document.getElementById('stat-current-streak-sub').textContent = 'Sedan ' + formatDate(currentStart.start);
+      } else {
+        document.getElementById('stat-current-streak-val').textContent = 'Ingen';
+        document.getElementById('stat-current-streak-sub').textContent = '';
+      }
+
+      const farmingRatio = getFarmingRatio(user.timeObject, user.farmingObject);
+      if (farmingRatio !== null) {
+        document.getElementById('stat-farming-ratio-val').textContent = farmingRatio + '%';
+        document.getElementById('stat-farming-ratio-sub').textContent = 'av total Discord-tid';
+      } else {
+        document.getElementById('stat-farming-ratio-val').textContent = '—';
+        document.getElementById('stat-farming-ratio-sub').textContent = '';
+      }
+
+      const bestFarmingRatioDay = getBestFarmingRatioDay(user.timeObject, user.farmingObject);
+      if (bestFarmingRatioDay) {
+        const d = new Date(parseInt(bestFarmingRatioDay.year), parseInt(bestFarmingRatioDay.month) - 1, parseInt(bestFarmingRatioDay.day));
+        document.getElementById('stat-best-farming-ratio-val').textContent = formatDate(d);
+        document.getElementById('stat-best-farming-ratio-sub').innerHTML =
+          '<span class="stat-sub-header">' + bestFarmingRatioDay.ratio + '% farming</span>' +
+          '<span class="stat-sub-item">' + convertToTime(bestFarmingRatioDay.discordTime) + ' discord</span>' +
+          '<span class="stat-sub-item">' + convertToTime(bestFarmingRatioDay.farming) + ' farming</span>';
+      } else {
+        document.getElementById('stat-best-farming-ratio-val').textContent = '—';
+        document.getElementById('stat-best-farming-ratio-sub').textContent = '';
+      }
+
+      const bestFarmingDay = getBestFarmingDay(user.farmingObject);
+      if (bestFarmingDay) {
+        const d = new Date(parseInt(bestFarmingDay.year), parseInt(bestFarmingDay.month) - 1, parseInt(bestFarmingDay.day));
+        document.getElementById('stat-best-farming-val').textContent = formatDate(d);
+        document.getElementById('stat-best-farming-sub').textContent = convertToTime(bestFarmingDay.time);
+      } else {
+        document.getElementById('stat-best-farming-val').textContent = '—';
+        document.getElementById('stat-best-farming-sub').textContent = '';
+      }
+
+      const userSounds = allSounds.filter(s => s.creator === user.name);
+      const soundCount = userSounds.length;
+      const soundsBtn = document.getElementById('stat-sounds-val');
+      soundsBtn.textContent = soundCount;
+      if (soundCount > 0) {
+        soundsBtn.disabled = false;
+        soundsBtn.onclick = () => showSounds(user.name);
+      } else {
+        soundsBtn.disabled = true;
+        soundsBtn.onclick = null;
+      }
+
+      buildUserChart(user);
+
+      document.querySelector('header').style.display  = 'none';
+      document.querySelector('main').style.display    = 'none';
+      document.getElementById('profile-view').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    function hideProfile() {
+      document.getElementById('profile-view').style.display  = 'none';
+      document.querySelector('header').style.display         = '';
+      document.querySelector('main').style.display           = '';
+      window.scrollTo(0, 0);
+    }
+
+    function showSounds(userName) {
+      const userSounds = allSounds.filter(s => s.creator === userName);
+      document.getElementById('sounds-user-name').textContent = userName;
+
+      const list = document.getElementById('sounds-list');
+      list.innerHTML = '';
+      userSounds.sort((a, b) => b.createdAt - a.createdAt);
+
+      const months = ['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec'];
+      userSounds.forEach(sound => {
+        const item = document.createElement('div');
+        item.className = 'sound-item';
+        const d = sound.createdAt;
+        const dateStr = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+        item.innerHTML =
+          '<span class="sound-name">' + escHtml(sound.name) + '</span>' +
+          '<span class="sound-date">' + dateStr + '</span>';
+        list.appendChild(item);
+      });
+
+      document.getElementById('profile-view').style.display = 'none';
+      document.getElementById('sounds-view').style.display  = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    function hideSounds() {
+      document.getElementById('sounds-view').style.display  = 'none';
+      document.getElementById('profile-view').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+  </script>
+</head>
+<body onload="loadData()">
+
+  <header>
+    <a href="index.html" class="back-btn">&#8592; Tillbaka</a>
+    <h1>&#129485; Onion Score</h1>
+    <button class="refresh-btn" onclick="loadData()">&#8635; Uppdatera</button>
+  </header>
+
+  <main>
+    <div id="error-msg"></div>
+
+    <div id="loading">
+      <div class="spinner"></div>
+      <span>Hämtar data&hellip;</span>
+    </div>
+
+    <div id="table-container">
+      <div class="meta-row">
+        <span class="updated-time" id="updated-time">—</span>
+        <span class="user-count" id="user-count"></span>
+      </div>
+
+      <div class="filter-row">
+        <div class="filter-group">
+          <label for="filter-year">År</label>
+          <select id="filter-year" onchange="applyFilters()">
+            <option value="All">Alla</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+            <option value="2029">2029</option>
+            <option value="2030">2030</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-month">Månad</label>
+          <select id="filter-month" onchange="applyFilters()">
+            <option value="All">Alla</option>
+            <option>Januari</option>
+            <option>Februari</option>
+            <option>Mars</option>
+            <option>April</option>
+            <option>Maj</option>
+            <option>Juni</option>
+            <option>Juli</option>
+            <option>Augusti</option>
+            <option>September</option>
+            <option>Oktober</option>
+            <option>November</option>
+            <option>December</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-day">Period</label>
+          <select id="filter-day" onchange="applyFilters()">
+            <option value="All">Alla</option>
+            <option value="1-7">1–7</option>
+            <option value="8-15">8–15</option>
+            <option value="16-23">16–23</option>
+            <option value="24-31">24–31</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Namn</th>
+              <th>Total tid</th>
+              <th>Session</th>
+              <th>Längst borta</th>
+              <th>Streak</th>
+            </tr>
+          </thead>
+          <tbody id="score-body"></tbody>
+        </table>
+      </div>
+
+      <div class="chart-section">
+        <p class="chart-title">Total Discord-tid per månad</p>
+        <div class="chart-wrap">
+          <canvas id="time-chart"></canvas>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Sounds view -->
+  <div id="sounds-view">
+    <div class="sounds-main">
+      <button class="profile-back-btn" onclick="hideSounds()">&#8592; Tillbaka till profil</button>
+      <h2 class="sounds-title">&#127911; Ljud av <span id="sounds-user-name"></span></h2>
+      <div id="sounds-list" class="sounds-list"></div>
+    </div>
+  </div>
+
+  <!-- Profile view -->
+  <div id="profile-view">
+    <div class="profile-main">
+      <button class="profile-back-btn" onclick="hideProfile()">&#8592; Tillbaka till leaderboard</button>
+
+      <div class="profile-hero">
+        <div class="avatar"><span id="avatar-initial">?</span></div>
+        <h2 id="profile-name"></h2>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-icon">&#127942;</div>
+          <div class="stat-label">Bästa löken</div>
+          <div class="stat-value" id="stat-best-day-val">—</div>
+          <div class="stat-sub"   id="stat-best-day-sub"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">&#128293;</div>
+          <div class="stat-label">Längsta streak</div>
+          <div class="stat-value" id="stat-streak-val">—</div>
+          <div class="stat-sub"   id="stat-streak-sub"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">&#128293;</div>
+          <div class="stat-label">Nuvarande streak</div>
+          <div class="stat-value" id="stat-current-streak-val">—</div>
+          <div class="stat-sub"   id="stat-current-streak-sub"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">&#129492;</div>
+          <div class="stat-label">Farming-andel</div>
+          <div class="stat-value" id="stat-farming-ratio-val">—</div>
+          <div class="stat-sub"   id="stat-farming-ratio-sub"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">&#129752;</div>
+          <div class="stat-label">Högst farming-andel</div>
+          <div class="stat-value" id="stat-best-farming-ratio-val">—</div>
+          <div class="stat-sub"   id="stat-best-farming-ratio-sub"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">&#127807;</div>
+          <div class="stat-label">Längsta farming-dag</div>
+          <div class="stat-value" id="stat-best-farming-val">—</div>
+          <div class="stat-sub"   id="stat-best-farming-sub"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">&#128197;</div>
+          <div class="stat-label">Största lökdagen</div>
+          <div class="stat-value" id="stat-weekday-val">—</div>
+          <div class="stat-sub"   id="stat-weekday-sub"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">&#127911;</div>
+          <div class="stat-label">Ljud uppladdade</div>
+          <div class="stat-value"><button class="sounds-count-btn" id="stat-sounds-val" disabled>—</button></div>
+          <div class="stat-sub">Klicka för att se listan</div>
+        </div>
+      </div>
+      <div class="chart-section">
+        <p class="chart-title">Discord-tid per månad</p>
+        <div class="chart-wrap">
+          <canvas id="user-time-chart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
