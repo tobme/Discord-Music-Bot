@@ -40,32 +40,6 @@ jobs:
         working-directory: cloud
         run: npm test
 
-  deploy-dev:
-    if: github.event_name == 'push'
-    name: Deploy to Back4App Dev
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Parse CLI
-        run: curl https://raw.githubusercontent.com/back4app/parse-cli/back4app/installer.sh | sudo /bin/bash
-
-      - name: Configure Back4App CLI
-        run: echo "${{ secrets.BACK4APP_ACCOUNT_KEY }}" | b4a configure accountkey
-
-      - name: Configure Dev App
-        run: b4a configure app --appId "${{ secrets.BACK4APP_APP_ID_DEV }}" --masterKey "${{ secrets.BACK4APP_MASTER_KEY_DEV }}" --serverURL "${{ secrets.BACK4APP_SERVER_URL }}" --env dev
-
-      - name: Print Parse config nicely
-        run: cat config/global.json | jq .
-
-      - name: Deploy to Back4App Dev
-        working-directory: ${{ github.workspace }}
-        run: b4a deploy
-
-
   deploy-prod:
     if: github.event_name == 'workflow_dispatch'
     name: Deploy to Back4App Prod
