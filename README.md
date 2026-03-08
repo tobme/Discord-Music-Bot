@@ -1,69 +1,89 @@
-# Discord Music Bot
+# Discan — Discord Bot
 
-## Table of Contents
+A Discord bot for tracking voice channel activity and playing sounds, with a web-based leaderboard.
 
-* [About the Project](#about-the-project)
-* [Getting Started](#getting-started)
-  * [Prerequisites](#prerequisites)
-  * [Installation](#installation)
-* [Host the bot](#host-the-bot)
-* [Contact](#contact)
+## Features
 
-## About the project
+- **Sound playback** — Plays a sound when a user joins a voice channel. Sounds are stored in a Parse (Back4App) database.
+- **Time tracking** — Tracks how long each user spends in Discord voice channels per day, with AFK detection. Separates active time (`timeObject`) from farming time (`farmingObject`).
+- **Onion Score** — Leaderboard accessible via the `/onionscore` slash command or the web frontend, filterable by year, month, and period.
+- **User profiles** — Web frontend shows per-user stats: best day, streaks, farming ratio, best weekday, uploaded sounds, and more.
+- **Message reactions** — Bot automatically reacts to all server messages with emoji.
+- **Daily reload** — Sound library reloads from the database every 24 hours.
 
-Want to play rickroll when your friends join your discord channel? This is a simple discord bot that plays music when a specific user joins the channel. The project also contains the necessary files for hosting the bot with node.js to keep it online at all hours.\
-![](botGif.gif)
+## Slash Commands
 
-## Getting started
+| Command | Description |
+|---|---|
+| `/onionscore` | Shows the Discord time leaderboard with interactive year/month/period filters |
+| `/list` | Lists all queueable sounds |
+| `/listcategory` | Lists sounds grouped by category |
+| `/queue` | Queues a sound for playback |
+| `/spam` | Spam a sound |
+
+## Web Frontend (`/public`)
+
+| Page | Description |
+|---|---|
+| `index.html` | Main landing page |
+| `onion.html` | Onion Score leaderboard with charts and personal profile pages |
+| `upload.html` | Upload new sounds to the database |
+| `budord.html` | Server rules |
+
+## Project Structure
+
+```
+cloud/                  # Bot logic (Node.js)
+  app.js                # Entry point
+  ChannelManager.js     # Voice channel & sound playback coordination
+  MusicHandling/        # Sound loading, queuing, playback, shuffle
+  TimeHandling/         # Time tracking, calculations, user management
+  commands/utility/     # Slash command implementations
+public/                 # Web frontend (HTML/CSS/JS)
+unittest/               # Jest unit tests
+```
+
+## Getting Started
 
 ### Prerequisites
 
-* node.js
-[https://nodejs.org/en/](https://nodejs.org/en/) Note: You need node.js version 10.0.0 or newer
+- Node.js v22+
+- A Discord application and bot token — [Discord Developer Portal](https://discord.com/developers/applications)
+- A [Back4App](https://www.back4app.com/) Parse application
 
 ### Create the bot
 
-1. Create an account or log in on [https://discordapp.com/developers/applications/](https://discordapp.com/developers/applications/)
-2. Create a new application on the website
-3. Get your authorization token
-    1. Go to "Bot" section in the setting to the left on the site
-    2. Copy the token
-4. Send bot to server
-    1. Go to OAuth2
-    2. Under OAuth2 URL Generator select bot and application.commands
-    3. Under BOT PERMISSIONS select administrator
-    4. Copy the link and paste it into your browser
-    5. The bot should now show in your channel
+1. Create an application at [discord.com/developers/applications](https://discord.com/developers/applications)
+2. Go to **Bot** → copy the token
+3. Go to **OAuth2 → URL Generator**, select `bot` and `application.commands`, grant Administrator permission
+4. Paste the generated URL in your browser and add the bot to your server
 
- ### Installation
- 
+### Installation
+
 1. Clone the repository
-2. Create a new file auth.js and add your auth
+2. Install dependencies:
+   ```sh
+   npm install
+   ```
+3. Create a `.env` file in the root with your credentials:
+   ```env
+   TOKEN=<discord bot token>
+   PARSE_APP_ID=<back4app application id>
+   PARSE_JS_ID=<back4app javascript key>
+   BOT_APP_ID=<discord bot application id>
+   SERVER_ID=<discord server id>
+   ```
+4. Start the bot:
+   ```sh
+   node cloud/app.js
+   ```
+
+### Running tests
+
 ```sh
-module.exports = {
-    token <add discord token here>: ,
-    parseAppId:,
-    parseJsId:,
-    botAppId: <right click on bot and copy id>,
-    serverId: <right click on server and copy id>
-}
+cd cloud && npm test
 ```
-3. run "npm install"
-
-## Host the bot
-
-I've personally hosted my discord bot on [https://www.heroku.com/](https://www.heroku.com/) which works good most of the time and is 100% free, however, it is not recommend by discord developers since it doesn't work too good with the opus engine\
-The files required for the host already exists.
-1. Create a project on heroku
-2. Add buildpacks
-    1. Go to settings -> buildpacks and add the following buildpacks
-    2. heroku/nodejs
-    3. https://github.com/dubsmash/heroku-buildpack-opus.git
-    4. https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest
-3. Push your code to the project
-4. Under resources in your project make sure that "worker" is enabled
-5. The bot should now work
 
 ## Contact
 
-Tobias Mellberg - Tobbemellberg@hotmail.se
+Tobias Mellberg — Tobbemellberg@hotmail.se

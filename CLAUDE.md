@@ -12,7 +12,7 @@ Assist in general development, including feature expansion, debugging, and maint
 - **Style:** Use ES Modules (import/export). Always include error handling for Discord API calls.
 
 ## Common Commands
-- **Run tests:** `npm test`
+- **Run tests:** `npm test in cloud/ directory`
 - **Run the bot (Dev):** `node cloud/app.js`
 - **Install dependencies:** `npm install`
 
