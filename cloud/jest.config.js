@@ -15,4 +15,9 @@ module.exports = {
 
   // Resolve modules from cloud/node_modules for tests outside rootDir
   modulePaths: ['<rootDir>/node_modules'],
+
+  // Map unresolvable third-party modules to manual mocks
+  moduleNameMapper: {
+    '^discord\\.js$': '<rootDir>/__mocks__/discord.js',
+  },
 };

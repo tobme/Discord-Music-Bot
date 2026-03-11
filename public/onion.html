@@ -909,6 +909,101 @@
       });
     }
 
+    function buildOnionPercentChart(user) {
+      const allKeys = new Set();
+
+      for (const [year, months] of Object.entries(user.timeObject || {})) {
+        for (const month of Object.keys(months)) {
+          allKeys.add(year + '-' + month.padStart(2, '0'));
+        }
+      }
+      for (const [year, months] of Object.entries(user.farmingObject || {})) {
+        for (const month of Object.keys(months)) {
+          allKeys.add(year + '-' + month.padStart(2, '0'));
+        }
+      }
+
+      const sortedKeys = Array.from(allKeys).sort();
+
+      // Fill in all months from first to now
+      if (sortedKeys.length > 0) {
+        const [firstYear, firstMonth] = sortedKeys[0].split('-').map(Number);
+        const now = new Date();
+        let y = firstYear, m = firstMonth;
+        while (y < now.getFullYear() || (y === now.getFullYear() && m <= now.getMonth() + 1)) {
+          const key = y + '-' + String(m).padStart(2, '0');
+          if (!allKeys.has(key)) allKeys.add(key);
+          m++;
+          if (m > 12) { m = 1; y++; }
+        }
+      }
+
+      const filledKeys = Array.from(allKeys).sort();
+
+      const monthNames = ['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+      const labels = filledKeys.map(key => {
+        const [year, month] = key.split('-');
+        return monthNames[parseInt(month) - 1] + ' ' + year;
+      });
+
+      const values = filledKeys.map(key => {
+        const [year, month] = key.split('-');
+        const days = user.timeObject?.[year]?.[month] || {};
+        const farmDays = user.farmingObject?.[year]?.[month] || {};
+        const allDays = new Set([...Object.keys(days), ...Object.keys(farmDays)]);
+
+        let totalTime = 0, totalFarming = 0;
+        for (const day of allDays) {
+          totalTime += Number(days[day] || 0);
+          totalFarming += Number(farmDays[day] || 0);
+        }
+
+        const total = totalTime + totalFarming;
+        if (total === 0) return null;
+        return Math.round((totalFarming / total) * 100);
+      });
+
+      if (window._onionPctChart) window._onionPctChart.destroy();
+
+      const ctx = document.getElementById('user-onion-pct-chart').getContext('2d');
+      window._onionPctChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            data: values,
+            backgroundColor: 'rgba(34, 197, 94, 0.45)',
+            borderColor: '#4ade80',
+            borderWidth: 2,
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: { label: ctx => ctx.parsed.y !== null ? ctx.parsed.y + '%' : 'Ingen data' }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#8892a4', font: { size: 11 }, maxRotation: 45 },
+              grid:  { color: 'rgba(34, 197, 94, 0.08)' },
+            },
+            y: {
+              min: 0,
+              max: 100,
+              ticks: { color: '#8892a4', font: { size: 11 }, callback: v => v + '%' },
+              grid:  { color: 'rgba(34, 197, 94, 0.08)' },
+              beginAtZero: true,
+            }
+          }
+        }
+      });
+    }
+
     function buildUserChart(user) {
       const monthTotals = {};
 
@@ -1258,6 +1353,7 @@
       }
 
       buildUserChart(user);
+      buildOnionPercentChart(user);
 
       document.querySelector('header').style.display  = 'none';
       document.querySelector('main').style.display    = 'none';
@@ -1488,6 +1584,12 @@
         <p class="chart-title">Discord-tid per månad</p>
         <div class="chart-wrap">
           <canvas id="user-time-chart"></canvas>
+        </div>
+      </div>
+      <div class="chart-section">
+        <p class="chart-title">Farming% per månad</p>
+        <div class="chart-wrap">
+          <canvas id="user-onion-pct-chart"></canvas>
         </div>
       </div>
     </div>
